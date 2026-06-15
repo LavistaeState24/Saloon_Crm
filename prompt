@@ -1,0 +1,433 @@
+I already have an existing MERN-based Real Estate Project Inventory CRM for Lavista Estate.
+
+Current CRM already includes:
+- Project Master
+- Project add/edit/list/detail
+- Client-safe project sharing
+- Hidden internal project fields
+- WhatsApp share
+- Brochure/video/photos sharing
+- Smart project search filters
+- Share history
+- Login/Auth
+- Role-based permissions
+- Dashboard basics
+
+Now I want to upgrade this existing CRM into a complete Real Estate Channel Partner CRM.
+
+Important:
+Do NOT rebuild the project from scratch.
+Do NOT remove or break existing Project Inventory, Client Share Mode, hidden field logic, WhatsApp share, brochure/video/photo sharing, or role permissions.
+Only extend the current CRM with new modules and APIs using clean architecture.
+
+Tech stack:
+Frontend: React + Vite + Tailwind CSS
+Backend: Node.js + Express
+Database: MongoDB
+Auth: JWT
+File Upload:AWS S3 setup
+UI: responsive premium CRM design with reusable components
+
+Main CRM Flow:
+Lead Upload → Staff Assign → First Call → Requirement Taken → Property Share → Follow-up → Positive Lead → Site Visit → Negotiation → Booking → Closed Deal
+
+1. ADD LEAD MANAGEMENT MODULE
+
+Create Lead model, API routes, controller, validation, frontend pages and table.
+
+Lead fields:
+- clientName
+- phone
+- alternatePhone
+- email
+- budgetMin
+- budgetMax
+- requirementType: 1BHK/2BHK/3BHK/4BHK/ PentHouse, Raw House,Tenament,bunglow, Plot / Commercial / Villa
+- areaPreference
+- purpose: Investment / Own Use
+- source: Meta Ads / Google Ads / Walk-in / Reference / Broker / WhatsApp / Website
+- assignedStaff
+- leadStatus
+- interestLevel: Hot / Warm / Cold
+- notes
+- isActive
+
+Lead Status:
+- New Lead
+- Call Pending
+- Connected
+- Not Connected
+- Requirement Taken
+- Details Sent
+- Follow-up Pending
+- Positive
+- Site Visit Planned
+- Site Visit Done
+- Negotiation
+- Booking
+- Closed
+- Lost
+
+Features:
+- Add lead
+- Edit lead
+- Delete lead only if permission allows
+- View lead detail
+- Search leads
+- Filter by status, source, staff, budget, requirement, date
+- Pagination for 1000+ records
+- Staff can only see assigned leads
+- Admin/Super Admin can see all leads
+- Manager can see team leads
+
+2. ADD LEAD IMPORT FEATURE
+Create Excel/CSV lead import system.
+
+Fields to import:
+- clientName
+- phone
+- email
+- budget
+- requirement
+- areaPreference
+- source
+- assignedStaff
+
+Rules:
+- Detect duplicate phone numbers
+- Skip or mark duplicate leads
+- Show import success/error summary
+- Imported leads default status should be New Lead
+
+3. ADD CALLING SYSTEM
+Create CallLog model and call update form inside lead detail page.
+
+Call update fields:
+- leadId
+- callConnected: Yes/No
+- interestLevel: Hot / Warm / Cold
+- discussionSummary
+- requirementNote
+- objection
+- nextAction
+- nextFollowupDateTime
+- reminderType
+- callDuration
+- createdBy
+
+Rules:
+- After every call, discussion note is compulsory
+- If call is connected, requirement note is compulsory
+- Next follow-up date/time is compulsory unless lead is Closed or Lost
+- If lead is Lost, lost reason is compulsory
+- Every call update should be saved in client timeline/history
+
+4. ADD FOLLOW-UP AND REMINDER SYSTEM
+Create Followup/Reminder module.
+
+Reminder types:
+- Call Reminder
+- Details Send Reminder
+- WhatsApp Follow-up Reminder
+- Site Visit Reminder
+- Payment Reminder
+- Document Reminder
+
+Fields:
+- leadId
+- assignedStaff
+- reminderType
+- reminderDateTime
+- note
+- status: Pending / Completed / Snoozed / Overdue
+- completedAt
+- completedBy
+
+Rules:
+- Today reminders should show on dashboard
+- Overdue reminders should appear in red
+- Staff should not be allowed to start new lead calling if overdue follow-ups are pending
+- Admin/Super Admin can override this lock
+- Reminder completion requires action note
+- Details Sent status must require next follow-up
+
+5. ADD PROPERTY MATCHING FOR LEADS
+
+Use existing Project module.
+
+Inside lead detail page, add “Find Matching Projects”.
+
+Match projects by:
+- Budget range
+- BHK/configuration
+- Area preference
+- Property type
+- Possession
+- Available units
+
+Show matching projects in cards/table.
+
+Staff should be able to:
+- Select one or multiple projects
+- Choose shareable fields
+- Share via WhatsApp
+- Copy client-safe message
+- Send brochure/video/photos
+- Save share history against lead
+- Automatically update lead status to Details Sent
+- Create mandatory next follow-up after sharing
+
+Important:
+Client share must still hide:
+- Real Project Name
+- Builder Name
+- Exact Address
+- Internal Notes
+- Commission Details
+- Backend identity
+
+6. ADD POSITIVE CLIENT PAGE
+
+Create separate Positive Clients page.
+
+A lead becomes Positive when:
+- Budget is clear
+- Requirement is clear
+- Client is interested
+- Follow-up is active
+
+Show:
+- Client name
+- Phone
+- Budget
+- Requirement
+- Interested projects
+- Last discussion
+- Objection
+- Next follow-up
+- Assigned staff
+
+Filters:
+- Staff
+- Area
+- Budget
+- Requirement
+- Next follow-up date
+
+7. ADD SITE VISIT MANAGEMENT
+Create SiteVisit model, APIs and frontend pages.
+
+Fields:
+- leadId
+- clientName
+- projectId
+- assignedStaff
+- visitDateTime
+- pickupRequired: Yes/No
+- visitStatus: Planned / Done / Cancelled / Rescheduled
+- clientFeedback
+- nextAction
+- createdBy
+
+After visit status Done:
+- Client feedback is compulsory
+- Next action is compulsory
+
+Post visit result:
+- Interested
+- Negotiation
+- Not Interested
+- Revisit Required
+
+Features:
+- Site Visit page
+- Planned visits list
+- Done visits list
+- Calendar-style view optional
+- WhatsApp confirmation message
+- Reminder before visit
+
+8. ADD NEGOTIATION AND DEAL CLOSING MODULE
+
+Create Deal model, APIs and frontend pages.
+
+Deal fields:
+- leadId
+- finalProject
+- finalUnit
+- finalPrice
+- brokerageAmount
+- tokenAmount
+- bookingDate
+- paymentStatus
+- documentsPending
+- dealClosedBy
+- dealStatus: Negotiation / Booking / Closed / Cancelled
+- notes
+
+Rules:
+- Closed deal requires final price
+- Closed deal requires brokerage/payment details
+- Closed deal requires deal closed by staff
+- Booking date is compulsory for Booking/Closed status
+
+Features:
+- Deal closing page
+- Negotiation clients list
+- Closed deals list
+- Revenue summary
+- Staff-wise closing report
+
+9. ADD CLIENT HISTORY TIMELINE
+Inside every lead detail page, show complete timeline:
+
+- Lead created
+- Assigned staff changed
+- Call updates
+- Requirement updated
+- Property shared
+- Follow-up created/completed
+- Positive status update
+- Site visit planned/done
+- Negotiation update
+- Deal closed/lost
+
+Create ActivityLog model if not already available.
+
+10. DASHBOARD UPGRADE
+Upgrade dashboard with:
+
+- Total Leads
+- New Leads
+- Today Follow-ups
+- Pending Calls
+- Overdue Follow-ups
+- Positive Clients
+- Site Visit Clients
+- Negotiation Clients
+- Closed Deals
+- Lost Leads
+- Staff-wise performance
+- Lead source performance
+- Daily calling report
+- Monthly closing report
+
+Use role-based data:
+- Super Admin/Admin see all data
+- Manager sees team data
+- Sales sees own data
+- Data Entry sees only project-related dashboard
+
+11. ROLE PERMISSIONS
+
+Update RBAC permissions for new modules:
+
+Modules:
+- leads
+- callLogs
+- followups
+- reminders
+- positiveClients
+- siteVisits
+- deals
+- reports
+- activityLogs
+
+Roles:
+
+Super Admin:
+- Full access to everything
+- Can override locks
+- Can manage permissions
+
+Admin:
+- Manage all leads/projects/followups/site visits/deals
+- Assign staff
+- View reports
+
+Manager:
+- View team leads
+- Assign leads
+- Monitor follow-ups
+- Manage site visits
+- View team reports
+
+Sales Executive:
+- View assigned leads only
+- Add call updates
+- Add follow-ups
+- Share properties
+- Update site visits
+- Cannot delete records
+- Cannot see all reports
+
+Data Entry:
+- Add/edit project details
+- Upload brochure/photos/videos
+- Cannot see leads/deals/client data
+
+12. UI REQUIREMENTS
+
+Create clean CRM UI with:
+- Responsive layout
+- Data tables with pagination
+- Search and filters
+- Status badges
+- Hot/Warm/Cold badges
+- Overdue reminder red badge
+- Lead status pipeline UI
+- Reusable forms
+- Modal confirmations
+- Toast notifications
+- Loading skeletons
+- Empty states
+
+Use existing theme:
+- Black / Ink
+- Gold
+- Ivory
+- Beige
+- Premium real estate CRM look
+
+13. BACKEND REQUIREMENTS
+Create clean backend structure:
+- models
+- controllers
+- routes
+- validators
+- middleware
+- services
+
+Add proper MongoDB indexes for:
+- phone
+- assignedStaff
+- leadStatus
+- reminderDateTime
+- source
+- createdAt
+
+Add validation and error handling.
+
+All APIs should support:
+- pagination
+- search
+- filters
+- role-based access
+- assigned-user scope
+
+14. FINAL GOAL
+The CRM should become:
+
+Lavista Real Estate CRM
+Tagline:
+“Lead se Closing tak — complete real estate sales control system.”
+
+Main purpose:
+- Keep project identity confidential
+- Manage leads from upload to closing
+- Control staff workflow
+- Force proper follow-ups
+- Track positive clients
+- Manage site visits
+- Track negotiations and deals
+- Improve staff performance and closing ratio
