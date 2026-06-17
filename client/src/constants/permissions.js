@@ -1,17 +1,17 @@
 import { industryLabels } from "../config/industryLabels";
 
 export const permissionModules = [
-  { key: "dashboard", label: "Overview" },
+  { key: "dashboard", label: industryLabels.navigation.dashboard },
   { key: "projects", label: industryLabels.dashboard.services },
   { key: "clients", label: industryLabels.dashboard.customers },
-  { key: "followups", label: industryLabels.dashboard.reminders },
+  { key: "followups", label: industryLabels.navigation.followups },
   { key: "siteVisits", label: industryLabels.dashboard.appointments },
   { key: "deals", label: industryLabels.dashboard.billing },
   { key: "dealReports", label: industryLabels.dashboard.salonReports },
   { key: "shareRecords", label: "Share Records" },
-  { key: "users", label: "Staff" },
+  { key: "users", label: industryLabels.navigation.staff },
   { key: "reports", label: industryLabels.dashboard.salonReports },
-  { key: "settings", label: "Settings" },
+  { key: "settings", label: industryLabels.navigation.settings },
 ];
 
 export const permissionActions = ["view", "create", "update", "delete", "scope"];
