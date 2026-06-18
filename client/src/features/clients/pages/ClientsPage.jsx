@@ -8,11 +8,16 @@ import Button from "../../../components/common/Button";
 import FormInput from "../../../components/common/FormInput";
 import Modal from "../../../components/common/Modal";
 import SelectDropdown from "../../../components/common/SelectDropdown";
-import { interestLevelOptions, leadStatusOptions } from "../../../constants/theme";
 import { useAuth } from "../../../hooks/useAuth";
 import { useCan } from "../../../hooks/useCan";
 import { clientService } from "../../../services/clientService";
 import { userService } from "../../../services/userService";
+import {
+  salonCustomerStatusOptions,
+  salonFormLabels,
+  salonPriorityLevelOptions,
+  normalizeSalonCustomerStatus,
+} from "../../../config/industryLabels";
 import { formatBudgetRange, getInterestLevelTone } from "../clientPipeline";
 import LeadImportModal from "../components/LeadImportModal";
 
@@ -92,7 +97,8 @@ export default function ClientsPage() {
           .filter(Boolean)
           .some((value) => String(value).toLowerCase().includes(normalizedSearch));
 
-      const matchesStatus = !filters.leadStatus || client.leadStatus === filters.leadStatus;
+      const matchesStatus =
+        !filters.leadStatus || normalizeSalonCustomerStatus(client.leadStatus) === filters.leadStatus;
       const matchesInterest = !filters.interestLevel || client.interestLevel === filters.interestLevel;
       const matchesStaff = !filters.assignedStaff || client.assignedStaff?._id === filters.assignedStaff;
 
@@ -101,7 +107,7 @@ export default function ClientsPage() {
   }, [clients, filters]);
 
 
-  const formatLeadAge = (createdAt) => {
+  const formatCustomerAge = (createdAt) => {
     if (!createdAt) return "-";
 
     const diffMs = Date.now() - new Date(createdAt).getTime();
@@ -115,8 +121,8 @@ export default function ClientsPage() {
     return `${diffDays} days old`;
   };
 
-  // to show the color in days of leads
-  const getLeadAgeToneClass = (createdAt) => {
+  // Shows color based on how long ago the customer was added
+  const getCustomerAgeToneClass = (createdAt) => {
     if (!createdAt) {
       return "border-white/10 bg-white/5 text-muted";
     }
@@ -139,7 +145,7 @@ export default function ClientsPage() {
     return "border-rose-400/30 bg-rose-500/10 text-rose-300";
   };
 
-  const formatLeadDate = (createdAt) => {
+  const formatCustomerDate = (createdAt) => {
     if (!createdAt) return "-";
 
     const date = new Date(createdAt);
@@ -160,7 +166,7 @@ export default function ClientsPage() {
     "inline-flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-muted transition hover:border-rose-400/50 hover:bg-rose-500/10 hover:text-rose-300";
 
   const columns = [
-    { key: "ownerName", label: "Customer" },
+    { key: "ownerName", label: salonFormLabels.customerName },
     {
       key: "assignedStaff",
       label: "Assigned",
@@ -169,41 +175,45 @@ export default function ClientsPage() {
     },
     {
       key: "leadStatus",
-      label: "Status",
-      render: (row) => <Badge tone="slate">{row.leadStatus || "New Customer"}</Badge>,
+      label: salonFormLabels.customerStatus,
+      render: (row) => <Badge tone="slate">{normalizeSalonCustomerStatus(row.leadStatus) || "New Customer"}</Badge>,
     },
     {
       key: "interestLevel",
-      label: "Interest",
+      label: salonFormLabels.priorityLevel,
       render: (row) => <Badge tone={getInterestLevelTone(row.interestLevel)}>{row.interestLevel || "Warm"}</Badge>,
     },
-    { key: "purpose", label: "Purpose", render: (row) => row.purpose || "Not added" },
+    {
+      key: "purpose",
+      label: salonFormLabels.serviceInterested,
+      render: (row) => row.requirementType || row.purpose || "Not added",
+    },
     {
       key: "areaPreference",
-      label: "Area",
+      label: salonFormLabels.preferredBranch,
       render: (row) => row.areaPreference || row.premiseArea || "Not added",
     },
     {
       key: "createdAt",
-      label: "Customer Added",
-      render: (row) => formatLeadDate(row.createdAt),
+      label: "Added",
+      render: (row) => formatCustomerDate(row.createdAt),
     },
     {
       key: "leadAge",
-      label: "Customer Age",
+      label: "Added Since",
       render: (row) => (
         <span
-          className={`inline-flex rounded-full border px-2 py-2 text-xs font-medium ${getLeadAgeToneClass(
+          className={`inline-flex rounded-full border px-2 py-2 text-xs font-medium ${getCustomerAgeToneClass(
             row.createdAt
           )}`}
         >
-          {formatLeadAge(row.createdAt)}
+          {formatCustomerAge(row.createdAt)}
         </span>
       ),
     },
     {
       key: "budget",
-      label: "Budget",
+      label: "Expected Spend Range",
       searchValue: (row) => `${row.budgetMin || ""} ${row.budgetMax || ""}`,
       render: (row) => formatBudgetRange(row.budgetMin, row.budgetMax),
     },
@@ -249,7 +259,7 @@ export default function ClientsPage() {
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <p className="text-xs uppercase tracking-[0.3em] text-gold">Customer Pipeline</p>
-          <h2 className="mt-2 font-display text-3xl">Customer tracking, ownership, and conversion flow</h2>
+          <h2 className="mt-2 font-display text-3xl">Customer tracking, service interest, and conversion flow</h2>
         </div>
         {canCreateClients ? (
           <div className="flex flex-wrap gap-3">
@@ -266,19 +276,19 @@ export default function ClientsPage() {
       <div className="grid gap-4 rounded-[28px] border border-white/10 bg-white/5 p-5 shadow-glass md:grid-cols-2 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)_minmax(0,0.9fr)_minmax(0,0.9fr)_minmax(0,0.9fr)_auto]">
         <FormInput
           label="Search"
-          placeholder="Name, phone, area..."
+          placeholder="Name, phone, branch..."
           value={filters.search}
           onChange={(event) => setFilters((current) => ({ ...current, search: event.target.value }))}
         />
         <SelectDropdown
           label="Customer Status"
-          options={leadStatusOptions}
+          options={salonCustomerStatusOptions}
           value={filters.leadStatus}
           onChange={(event) => setFilters((current) => ({ ...current, leadStatus: event.target.value }))}
         />
         <SelectDropdown
-          label="Interest Level"
-          options={interestLevelOptions}
+          label="Priority Level"
+          options={salonPriorityLevelOptions}
           value={filters.interestLevel}
           onChange={(event) => setFilters((current) => ({ ...current, interestLevel: event.target.value }))}
         />

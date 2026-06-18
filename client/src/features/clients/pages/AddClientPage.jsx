@@ -19,16 +19,6 @@ import Button from "../../../components/common/Button";
 import FormInput from "../../../components/common/FormInput";
 import PageSkeleton from "../../../components/common/PageSkeleton";
 import SelectDropdown from "../../../components/common/SelectDropdown";
-import {
-  interestLevelOptions,
-  leadPurposeOptions,
-  leadStatusOptions,
-  propertyConditionOptions,
-  propertySourceOptions,
-  propertyStatusOptions,
-  propertyTypes,
-  requirementTypeOptions,
-} from "../../../constants/theme";
 import { useAuth } from "../../../hooks/useAuth";
 import { clientService } from "../../../services/clientService";
 import { userService } from "../../../services/userService";
@@ -43,6 +33,14 @@ import {
   textRules,
   toOptionalNumber,
 } from "../../../utils/validation";
+import {
+  salonCustomerStatusOptions,
+  salonCustomerTypeOptions,
+  salonFormLabels,
+  salonPriorityLevelOptions,
+  normalizeSalonCustomerStatus,
+  salonServiceInterestedOptions
+} from "../../../config/industryLabels";
 import { formatCompactPrice } from "../clientPipeline";
 
 const initialState = {
@@ -62,7 +60,7 @@ const initialState = {
   propertyStatus: "",
   dateOfAddingProperty: "",
   assignedStaff: "",
-  leadStatus: "New Lead",
+  leadStatus: "New Customer",
   interestLevel: "Warm",
   source: "",
   purpose: "",
@@ -89,10 +87,10 @@ const mapClientToForm = (client) => ({
   propertyAge: client.propertyAge || "",
   propertySize: client.propertySize || "",
   internalNotes: client.internalNotes || "",
-  propertyStatus: client.propertyStatus || "",
+  propertyStatus: normalizeSalonCustomerStatus(client.propertyStatus) || "",
   dateOfAddingProperty: client.dateOfAddingProperty ? new Date(client.dateOfAddingProperty).toISOString().slice(0, 10) : "",
   assignedStaff: client.assignedStaff?._id || client.assignedStaff || "",
-  leadStatus: client.leadStatus || "New Lead",
+  leadStatus: normalizeSalonCustomerStatus(client.leadStatus) || "New Customer",
   interestLevel: client.interestLevel || "Warm",
   source: client.source || "",
   purpose: client.purpose || "",
@@ -167,6 +165,41 @@ export default function AddClientPage() {
 
   const ownerPrice = watch("ownerPrice");
   const budgetMin = watch("budgetMin");
+  const propertyTypeValue = watch("propertyType");
+  const propertyStatusValue = watch("propertyStatus");
+  const purposeValue = watch("purpose");
+  const sourceOfPropertyValue = watch("sourceOfProperty");
+  const requirementTypeValue = watch("requirementType");
+  const propertyConditionValue = watch("propertyCondition");
+
+  const sourceOptions = sourceOfPropertyValue && !["Walk-in", "Referral", "Instagram", "Phone", "Website"].includes(sourceOfPropertyValue)
+    ? [sourceOfPropertyValue, "Walk-in", "Referral", "Instagram", "Phone", "Website"]
+    : ["Walk-in", "Referral", "Instagram", "Phone", "Website"];
+
+  const purposeOptions =
+    purposeValue && !["Walk-in", "Appointment", "Consultation", "Package"].includes(purposeValue)
+      ? [purposeValue, "Walk-in", "Appointment", "Consultation", "Package"]
+      : ["Walk-in", "Appointment", "Consultation", "Package"];
+
+  const customerTypeOptions =
+    propertyTypeValue && !salonCustomerTypeOptions.includes(propertyTypeValue)
+      ? [propertyTypeValue, ...salonCustomerTypeOptions]
+      : salonCustomerTypeOptions;
+
+  const customerStatusOptions =
+    propertyStatusValue && !salonCustomerStatusOptions.includes(propertyStatusValue)
+      ? [propertyStatusValue, ...salonCustomerStatusOptions]
+      : salonCustomerStatusOptions;
+
+  const serviceInterestedOptions =
+    requirementTypeValue && !salonServiceInterestedOptions.includes(requirementTypeValue)
+      ? [requirementTypeValue, ...salonServiceInterestedOptions]
+      : salonServiceInterestedOptions;
+
+  const serviceConditionOptions =
+    propertyConditionValue && !["First time", "Regular", "Premium", "Package", "Trial"].includes(propertyConditionValue)
+      ? [propertyConditionValue, "First time", "Regular", "Premium", "Package", "Trial"]
+      : ["First time", "Regular", "Premium", "Package", "Trial"];
 
   const onSubmit = async (formValues) => {
     setFormError("");
@@ -227,15 +260,15 @@ export default function AddClientPage() {
       <div>
         <p className="text-md tracking-[0.1em] text-gold">{isEditMode ? "Customer Editing" : "Customer Intake"}</p>
         <h2 className="mt-2 font-display text-3xl">
-          {isEditMode ? "Update customer pipeline record" : "Create a new customer pipeline record"}
+          {isEditMode ? "Update customer profile" : "Create a new customer profile"}
         </h2>
       </div>
 
       <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
         <section className="grid gap-5 rounded-[32px] border border-white/10 bg-white/5 p-6 shadow-glass lg:grid-cols-2">
           <div className="lg:col-span-2">
-            <p className="text-xs uppercase tracking-[0.3em] text-gold">Pipeline Control</p>
-            <h3 className="mt-2 font-display text-2xl">Ownership, status, and requirement fit</h3>
+            <p className="text-xs uppercase tracking-[0.3em] text-gold">Customer Intake</p>
+            <h3 className="mt-2 font-display text-2xl">Appointment & Service Information</h3>
           </div>
 
           <SelectDropdown
@@ -248,63 +281,63 @@ export default function AddClientPage() {
           />
 
           <SelectDropdown
-            label="Customer Status"
+            label={salonFormLabels.customerStatus}
             icon={ClipboardList}
-            options={leadStatusOptions}
+            options={customerStatusOptions}
             error={getErrorMessage(errors.leadStatus)}
             {...register("leadStatus", selectRules("Customer status"))}
           />
 
           <SelectDropdown
-            label="Interest Level"
+            label={salonFormLabels.priorityLevel}
             icon={Shapes}
-            options={interestLevelOptions}
+            options={salonPriorityLevelOptions}
             error={getErrorMessage(errors.interestLevel)}
-            {...register("interestLevel", selectRules("Interest level"))}
+            {...register("interestLevel", selectRules("Priority level"))}
           />
 
           <FormInput
-            label="Customer Source"
+            label="Referral Source"
             icon={Shapes}
-            placeholder="Website, referral, call, broker..."
+            placeholder="Walk-in, Instagram, referral, call..."
             error={getErrorMessage(errors.source)}
-            {...register("source", textRules("Customer source", { min: 0, max: 100, required: false }))}
+            {...register("source", textRules("Source", { min: 0, max: 100, required: false }))}
           />
 
           <SelectDropdown
-            label="Purpose"
+            label="Appointment Type"
             icon={Shapes}
-            options={leadPurposeOptions}
-            placeholder="Select purpose"
+            options={purposeOptions}
+            placeholder="Select appointment type"
             error={getErrorMessage(errors.purpose)}
             {...register("purpose")}
           />
 
           <SelectDropdown
-            label="Requirement Type"
+            label={salonFormLabels.serviceInterested}
             icon={Shapes}
-            options={requirementTypeOptions}
-            placeholder="Select requirement type"
+            options={salonServiceInterestedOptions}
+            placeholder="Select service interested"
             error={getErrorMessage(errors.requirementType)}
-            {...register("requirementType")}
+            {...register("requirementType", selectRules("Service interested"))}
           />
 
           <FormInput
-            label="Area Preference"
+            label={salonFormLabels.preferredBranch}
             icon={MapPin}
-            placeholder="Preferred localities or micro-markets"
+            placeholder="Preferred branch or location"
             error={getErrorMessage(errors.areaPreference)}
-            {...register("areaPreference", textRules("Area preference", { min: 0, max: 120, required: false }))}
+            {...register("areaPreference", textRules("Preferred branch", { min: 0, max: 120, required: false }))}
           />
 
           <div className="space-y-2">
             <FormInput
-              label="Minimum Budget"
+              label={salonFormLabels.expectedSpendMin}
               icon={IndianRupee}
               type="number"
-              placeholder="Enter minimum budget"
+              placeholder="Enter expected spend min"
               error={getErrorMessage(errors.budgetMin)}
-              {...register("budgetMin", numberRules("Minimum budget", { required: false, min: 0 }))}
+              {...register("budgetMin", numberRules("Expected spend min", { required: false, min: 0 }))}
             />
             {formatCompactPrice(budgetMin) ? (
               <div className="inline-flex rounded-full border border-gold/30 bg-gold/10 px-3 py-1 text-xs font-medium text-gold-2">
@@ -315,15 +348,15 @@ export default function AddClientPage() {
 
           <div className="space-y-2">
             <FormInput
-              label="Maximum Budget"
+              label={salonFormLabels.expectedSpendMax}
               icon={IndianRupee}
               type="number"
-              placeholder="Enter maximum budget"
+              placeholder="Enter expected spend max"
               error={getErrorMessage(errors.budgetMax)}
               {...register("budgetMax", {
-                ...numberRules("Maximum budget", { required: false, min: 0 }),
+                ...numberRules("Expected spend max", { required: false, min: 0 }),
                 validate: (value) => {
-                  const baseValidation = numberRules("Maximum budget", { required: false, min: 0 }).validate(value);
+                  const baseValidation = numberRules("Expected spend max", { required: false, min: 0 }).validate(value);
 
                   if (baseValidation !== true) {
                     return baseValidation;
@@ -333,7 +366,7 @@ export default function AddClientPage() {
                     return true;
                   }
 
-                  return Number(value) >= Number(budgetMin) || "Maximum budget must be at least minimum budget";
+                  return Number(value) >= Number(budgetMin) || "Expected spend max must be at least expected spend min";
                 },
               })}
             />
@@ -345,24 +378,24 @@ export default function AddClientPage() {
           </div>
 
           <FormInput
-            label="Customer Notes"
+            label={salonFormLabels.notes}
             as="textarea"
             rows={5}
             className="lg:col-span-2"
-            placeholder="Conversation summary, next step, objections, urgency..."
+            placeholder="Service notes, preferences, allergies, occasion details..."
             error={getErrorMessage(errors.notes)}
             {...register("notes", textRules("Notes", { min: 0, max: 2000, required: false }))}
           />
 
           <FormInput
-            label="Last Call Status"
-            placeholder="Answered, no response, busy..."
+            label="Last Interaction Status"
+            placeholder="Contacted, no response, appointment planned..."
             error={getErrorMessage(errors.lastCallStatus)}
-            {...register("lastCallStatus", textRules("Last call status", { min: 0, max: 120, required: false }))}
+            {...register("lastCallStatus", textRules("Last contact status", { min: 0, max: 120, required: false }))}
           />
 
           <FormInput
-            label="Next Reminder Date"
+            label="Next Follow-up Date"
             type="date"
             error={getErrorMessage(errors.nextFollowUpDate)}
             {...register("nextFollowUpDate")}
@@ -372,13 +405,13 @@ export default function AddClientPage() {
         <section className="grid gap-5 rounded-[32px] border border-white/10 bg-white/5 p-6 shadow-glass lg:grid-cols-2">
           <div className="lg:col-span-2">
             <p className="text-xs uppercase tracking-[0.3em] text-gold">Customer Profile</p>
-            <h3 className="mt-2 font-display text-2xl">Customer Details</h3>
-          </div>
+            <h3 className="mt-2 font-display text-2xl">Customer Information</h3>
+          </div>  
 
           <FormInput
-            label="Customer Name"
+            label={salonFormLabels.customerName}
             icon={UserRound}
-            placeholder="Enter client name"
+            placeholder="Enter customer name"
             error={getErrorMessage(errors.ownerName)}
             {...register("ownerName", textRules("Customer name", { min: 3, max: 80 }))}
           />
@@ -389,7 +422,7 @@ export default function AddClientPage() {
             type="tel"
             inputMode="numeric"
             maxLength={10}
-            placeholder="Enter phone number"
+            placeholder="Enter customer phone number"
             error={getErrorMessage(errors.clientPhoneNumber)}
             {...register(
               "clientPhoneNumber",
@@ -418,54 +451,54 @@ export default function AddClientPage() {
           />
 
           <FormInput
-            label="Premise Name"
+            label="Branch Name"
             icon={Building2}
-            placeholder="Enter premise or project name"
+            placeholder="Enter branch name"
             error={getErrorMessage(errors.premiseName)}
-            {...register("premiseName", textRules("Premise name", {  min: 0, max: 100, required: false}))}
+            {...register("premiseName", textRules("Salon name", { min: 0, max: 100, required: false }))}
           />
 
           <FormInput
-            label="Premise Area"
+            label="Branch Location"
             icon={MapPin}
-            placeholder="Enter premise area"
+            placeholder="Enter branch location"
             error={getErrorMessage(errors.premiseArea)}
-            {...register("premiseArea", textRules("Premise area", { min: 2, max: 80 }))}
+            {...register("premiseArea", textRules("Branch area", { min: 2, max: 80 }))}
           />
 
           <SelectDropdown
-            label="Source of Property"
+            label="Source"
             icon={Shapes}
-            options={propertySourceOptions}
+            options={sourceOptions}
             error={getErrorMessage(errors.sourceOfProperty)}
-            {...register("sourceOfProperty", selectRules("Source of property"))}
+            {...register("sourceOfProperty", selectRules("Source"))}
           />
 
           <SelectDropdown
-            label="Property Type"
+            label={salonFormLabels.customerType}
             icon={Shapes}
-            options={propertyTypes}
+            options={customerTypeOptions}
             error={getErrorMessage(errors.propertyType)}
-            {...register("propertyType", selectRules("Property type"))}
+            {...register("propertyType", selectRules("Customer type"))}
           />
 
           <SelectDropdown
-            label="Property Status"
+            label={salonFormLabels.customerStatus}
             icon={Shapes}
-            options={propertyStatusOptions}
-            placeholder="Select property status"
+            options={customerStatusOptions}
+            placeholder="Select customer status"
             error={getErrorMessage(errors.propertyStatus)}
-            {...register("propertyStatus", selectRules("Property status", { requiredMessage: "Property status is required" }))}
+            {...register("propertyStatus", selectRules("Customer status", { requiredMessage: "Customer status is required" }))}
           />
 
           <div className="space-y-2">
             <FormInput
-              label="Owner Price"
+              label="Expected Spend"
               icon={IndianRupee}
               type="number"
-              placeholder="Enter owner price"
+              placeholder="Enter expected spend"
               error={getErrorMessage(errors.ownerPrice)}
-              {...register("ownerPrice", numberRules("Owner price", { min: 0 }))}
+              {...register("ownerPrice", numberRules("Expected spend", { min: 0 }))}
             />
             {formatCompactPrice(ownerPrice) ? (
               <div className="inline-flex rounded-full border border-gold/30 bg-gold/10 px-3 py-1 text-xs font-medium text-gold-2">
@@ -475,25 +508,25 @@ export default function AddClientPage() {
           </div>
 
           <SelectDropdown
-            label="Property Condition"
+            label="Service Preference"
             icon={Shapes}
-            options={propertyConditionOptions}
+            options={serviceConditionOptions}
             error={getErrorMessage(errors.propertyCondition)}
-            {...register("propertyCondition", selectRules("Property condition"))}
+            {...register("propertyCondition", selectRules("Service preference"))}
           />
 
           <FormInput
-            label="Property Age"
-            placeholder="e.g. 5 years"
+            label="Customer Age"
+            placeholder="e.g. 25 years"
             error={getErrorMessage(errors.propertyAge)}
-            {...register("propertyAge", textRules("Property age", { min: 1, max: 80 }))}
+            {...register("propertyAge", textRules("Customer age", { min: 1, max: 80 }))}
           />
 
           <FormInput
-            label="Size of Property"
-            placeholder="e.g. 1450 sq ft (optional)"
+            label="Package / Duration"
+            placeholder="e.g. 60 min, bridal package, premium service"
             error={getErrorMessage(errors.propertySize)}
-            {...register("propertySize", textRules("Size of property", { min: 0, max: 80, required: false }))}
+            {...register("propertySize", textRules("Package / duration", { min: 0, max: 80, required: false }))}
           />
 
           <FormInput
@@ -502,15 +535,15 @@ export default function AddClientPage() {
             type="date"
             className="lg:col-span-2"
             error={getErrorMessage(errors.dateOfAddingProperty)}
-            {...register("dateOfAddingProperty", dateRules("Date of adding property", { required: true }))}
+            {...register("dateOfAddingProperty", dateRules("Date added", { required: true }))}
           />
 
           <FormInput
             label="Internal Notes"
             as="textarea"
             rows={4}
-            className="lg:col-span-2"
-            placeholder="Internal context related to property intake"
+            className="lg:col-span-1"
+            placeholder="Internal context related to customer intake"
             error={getErrorMessage(errors.internalNotes)}
             {...register("internalNotes", textRules("Internal notes", { min: 0, max: 500, required: false }))}
           />
@@ -525,7 +558,7 @@ export default function AddClientPage() {
             </Button>
           ) : null}
           <Button disabled={isSubmitting} icon={Save}>
-            {isSubmitting ? "Saving..." : isEditMode ? "Update Lead" : "Save Lead"}
+            {isSubmitting ? "Saving..." : isEditMode ? "Update Customer" : "Save Customer"}
           </Button>
         </div>
       </form>

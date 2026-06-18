@@ -10,43 +10,43 @@ import {
   validateRequiredText,
 } from "./common.js";
 
-const sourceOfPropertyValues = ["Owner", "Broker"];
-const propertyTypes = [
-  "1BHK",
-  "2BHK",
-  "2.5BHK",
-  "3BHK",
-  "4BHK",
-  "5BHK",
-  "6BHK",
-  "Villa",
-  "Plot",
-  "Land",
-  "Bunglow",
-  "Raw House",
-  "Tenament",
-  "Penthouse",
-  "Commercial",
-  "Apartment",
-  "Residential",
-  "Rental",
-  "Office",
-  "Showroom",
+const customerSourceOptions = [
+  "Walk-in",
+  "Referral",
+  "Instagram",
+  "Facebook",
+  "Google",
+  "WhatsApp",
+  "Phone",
+  "Website",
+  "Other",
 ];
-const propertyConditionValues = ["Unfurnished", "Semi Furnished", "Furnished", "Fully Furnished"];
-const propertyStatusValues = ["Available", "Hold", "Sold", "Rent Out", "Not Available"];
-const leadStatusValues = [
-  "New Lead",
-  "Call Pending",
-  "Connected",
-  "Requirement Taken",
-  "Details Sent",
+const customerTypeOptions = [
+  "Walk-in",
+  "Regular",
+  "VIP",
+  "Bridal",
+  "Corporate",
+];
+const serviceInterestedOptions = [
+  "",
+  "Haircut",
+  "Hair Color",
+  "Facial",
+  "Cleanup",
+  "Spa",
+  "Makeup",
+  "Bridal Package",
+  "Nail Art",
+  "Grooming",
+];
+const customerStatusOptions = [
+  "New Customer",
+  "Contacted",
+  "Appointment Planned",
+  "Service Completed",
   "Follow-up Pending",
-  "Positive",
-  "Site Visit Planned",
-  "Negotiation",
-  "Booking",
-  "Closed",
+  "Converted",
   "Lost",
 ];
 const interestLevelValues = ["Hot", "Warm", "Cold"];
@@ -108,34 +108,39 @@ export const validateClientInput = (payload, options = {}) => {
 
   const sanitized = {
     ...(shouldValidateField("ownerName")
-      ? { ownerName: validateRequiredText(errors, "ownerName", payload.ownerName, { label: "Owner name", min: 3, max: 80 }) }
+      ? { ownerName: validateRequiredText(errors, "ownerName", payload.ownerName, { label: "Customer name", min: 3, max: 80 }) }
       : {}),
     ...(shouldValidateField("address")
       ? { address: validateRequiredText(errors, "address", payload.address, { label: "Address", min: 5, max: 200 }) }
       : {}),
     ...(shouldValidateField("premiseName")
-      ? { premiseName: validateOptionalText(errors, "premiseName", payload.premiseName, { label: "Premise name", required: false,  max: 100 }) }
+      ? { premiseName: validateOptionalText(errors, "premiseName", payload.premiseName, { label: "Premise name", required: false, max: 100 }) }
       : {}),
     ...(shouldValidateField("premiseArea")
       ? { premiseArea: validateRequiredText(errors, "premiseArea", payload.premiseArea, { label: "Premise area", min: 2, max: 80 }) }
       : {}),
     ...(shouldValidateField("sourceOfProperty")
-      ? { sourceOfProperty: validateEnum(errors, "sourceOfProperty", payload.sourceOfProperty, {
-      label: "Source of property",
-      values: sourceOfPropertyValues,
-    }) }
+      ? {
+        sourceOfProperty: validateEnum(errors, "sourceOfProperty", payload.sourceOfProperty, {
+          label: "Source",
+          values: customerSourceOptions,
+        })
+      }
       : {}),
     ...(shouldValidateField("propertyType")
-      ? { propertyType: validateEnum(errors, "propertyType", payload.propertyType, { label: "Property type", values: propertyTypes }) }
+      ? { propertyType: validateEnum(errors, "propertyType", payload.propertyType, { label: "Customer type", values: customerTypeOptions }) }
       : {}),
     ...(shouldValidateField("ownerPrice")
-      ? { ownerPrice: validateNumber(errors, "ownerPrice", payload.ownerPrice, { label: "Owner price", required: false, min: 0 }) }
+      ? { ownerPrice: validateNumber(errors, "ownerPrice", payload.ownerPrice, { label: "Expected spend", required: false, min: 0 }) }
       : {}),
     ...(shouldValidateField("propertyCondition")
-      ? { propertyCondition: validateEnum(errors, "propertyCondition", payload.propertyCondition, {
-      label: "Property condition",
-      values: propertyConditionValues,
-    }) }
+      ? {
+        propertyCondition: validateOptionalText(errors, "propertyCondition", payload.propertyCondition, {
+          label: "Service interested",
+          required: false,
+          max: 80,
+        })
+      }
       : {}),
     ...(shouldValidateField("propertyAge")
       ? { propertyAge: validateRequiredText(errors, "propertyAge", payload.propertyAge, { label: "Property age", min: 1, max: 80 }) }
@@ -144,10 +149,12 @@ export const validateClientInput = (payload, options = {}) => {
       ? { propertySize: validateOptionalText(errors, "propertySize", payload.propertySize, { label: "Size of property", max: 80 }) }
       : {}),
     ...(shouldValidateField("clientPhoneNumber")
-      ? { clientPhoneNumber: validatePhone(errors, "clientPhoneNumber", payload.clientPhoneNumber, {
-      requiredMessage: "Client phone number is required",
-      invalidMessage: "Client phone number must be a valid 10-digit Indian mobile number",
-    }) }
+      ? {
+        clientPhoneNumber: validatePhone(errors, "clientPhoneNumber", payload.clientPhoneNumber, {
+          requiredMessage: "Client phone number is required",
+          invalidMessage: "Client phone number must be a valid 10-digit Indian mobile number",
+        })
+      }
       : {}),
     ...(shouldValidateField("email")
       ? { email: validateEmail(errors, "email", payload.email, { required: false }) }
@@ -156,30 +163,34 @@ export const validateClientInput = (payload, options = {}) => {
       ? { internalNotes: validateOptionalText(errors, "internalNotes", payload.internalNotes, { label: "Internal notes", max: 500 }) }
       : {}),
     ...(shouldValidateField("propertyStatus")
-      ? { propertyStatus: validateEnum(errors, "propertyStatus", payload.propertyStatus, {
-      label: "Property status",
-      values: propertyStatusValues,
-    }) }
+      ? {
+        propertyStatus: validateEnum(errors, "propertyStatus", payload.propertyStatus, {
+          label: "Customer status",
+          values: customerStatusOptions,
+        })
+      }
       : {}),
     ...(shouldValidateField("dateOfAddingProperty")
       ? {
-          dateOfAddingProperty: validateDate(errors, "dateOfAddingProperty", payload.dateOfAddingProperty, {
-            label: "Date of adding property",
-            required: true,
-          }),
-        }
+        dateOfAddingProperty: validateDate(errors, "dateOfAddingProperty", payload.dateOfAddingProperty, {
+          label: "Date of adding property",
+          required: true,
+        }),
+      }
       : {}),
     ...(shouldValidateField("assignedStaff")
       ? { assignedStaff: validateObjectId(errors, "assignedStaff", payload.assignedStaff, { label: "Assigned staff", required: false }) || null }
       : {}),
     ...(shouldValidateField("leadStatus")
-      ? { leadStatus: validateEnum(errors, "leadStatus", payload.leadStatus, { label: "Lead status", values: leadStatusValues }) }
+      ? { leadStatus: validateEnum(errors, "leadStatus", payload.leadStatus, { label: "Customer status", values: customerStatusOptions }) }
       : {}),
     ...(shouldValidateField("interestLevel")
-      ? { interestLevel: validateEnum(errors, "interestLevel", payload.interestLevel, {
-      label: "Interest level",
-      values: interestLevelValues,
-    }) }
+      ? {
+        interestLevel: validateEnum(errors, "interestLevel", payload.interestLevel, {
+          label: "Interest level",
+          values: interestLevelValues,
+        })
+      }
       : {}),
     ...(shouldValidateField("source")
       ? { source: validateOptionalText(errors, "source", payload.source, { label: "Lead source", max: 100 }) }
@@ -194,7 +205,13 @@ export const validateClientInput = (payload, options = {}) => {
       ? { budgetMax: validateNumber(errors, "budgetMax", payload.budgetMax, { label: "Maximum budget", required: false, min: 0 }) }
       : {}),
     ...(shouldValidateField("requirementType")
-      ? { requirementType: validateOptionalText(errors, "requirementType", payload.requirementType, { label: "Requirement type", max: 80 }) }
+      ? {
+        requirementType: validateEnum(errors, "requirementType", payload.requirementType, {
+          label: "Service interested",
+          values: serviceInterestedOptions,
+          required: false,
+        })
+      }
       : {}),
     ...(shouldValidateField("areaPreference")
       ? { areaPreference: validateOptionalText(errors, "areaPreference", payload.areaPreference, { label: "Area preference", max: 120 }) }
@@ -241,7 +258,7 @@ export const validateClientMatchingQuery = (payload) => {
   const errors = {};
   const sanitized = {
     area: validateOptionalText(errors, "area", payload.area, { label: "Area", max: 120 }) || undefined,
-    propertyType: validateOptionalText(errors, "propertyType", payload.propertyType, { label: "Property type", max: 120 }) || undefined,
+    propertyType: validateOptionalText(errors, "propertyType", payload.propertyType, { label: "Customer type", max: 120 }) || undefined,
     bhk: validateOptionalText(errors, "bhk", payload.bhk, { label: "BHK", max: 80 }) || undefined,
     possession: validateOptionalText(errors, "possession", payload.possession, { label: "Possession", max: 80 }) || undefined,
     status: validateOptionalText(errors, "status", payload.status, { label: "Status", max: 40 }) || undefined,
