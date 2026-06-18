@@ -30,10 +30,6 @@ import FormInput from "../../../components/common/FormInput";
 import Modal from "../../../components/common/Modal";
 import PageSkeleton from "../../../components/common/PageSkeleton";
 import SelectDropdown from "../../../components/common/SelectDropdown";
-import {
-  interestLevelOptions,
-  leadStatusOptions,
-} from "../../../constants/theme";
 import { useAuth } from "../../../hooks/useAuth";
 import { useCan } from "../../../hooks/useCan";
 import { clientService } from "../../../services/clientService";
@@ -47,6 +43,12 @@ import SiteVisitForm from "../../siteVisits/components/SiteVisitForm";
 import { formatSiteVisitDateTime, getSiteVisitStatusTone } from "../../siteVisits/siteVisitConfig";
 import { buildSiteVisitConfirmationMessage, getSiteVisitWhatsAppUrl } from "../../siteVisits/siteVisitMessaging";
 import ClientActivityTimeline from "../components/ClientActivityTimeline";
+import {
+  salonCustomerStatusOptions,
+  salonFormLabels,
+  salonPriorityLevelOptions,
+  normalizeSalonCustomerStatus,
+} from "../../../config/industryLabels";
 
 const reminderTypes = ["Call", "WhatsApp", "Details Send", "Site Visit", "Payment", "Document"];
 
@@ -64,7 +66,7 @@ export default function ClientDetailsPage() {
   const canShowQuickUpdate = canUpdateClients || isSalesUser;
   const initialCallForm = {
     callConnected: false,
-    leadStatus: "New Lead",
+    leadStatus: "New Customer",
     interestLevel: "Warm",
     discussionSummary: "",
     requirementNote: "",
@@ -118,7 +120,7 @@ export default function ClientDetailsPage() {
     setQuickEdit((current) => ({
       ...current,
       assignedStaff: nextClient.assignedStaff?._id || nextClient.assignedStaff || "",
-      leadStatus: nextClient.leadStatus || "New Lead",
+      leadStatus: normalizeSalonCustomerStatus(nextClient.leadStatus) || "New Customer",
       interestLevel: nextClient.interestLevel || "Warm",
       notes: nextClient.notes || "",
       internalNotes: nextClient.internalNotes || "",
@@ -162,9 +164,9 @@ export default function ClientDetailsPage() {
             label: `${user.name} (${user.role})`,
           })),
         );
-        setQuickEdit({
+          setQuickEdit({
           assignedStaff: data.assignedStaff?._id || data.assignedStaff || "",
-          leadStatus: data.leadStatus || "New Lead",
+          leadStatus: normalizeSalonCustomerStatus(data.leadStatus) || "New Customer",
           interestLevel: data.interestLevel || "Warm",
           notes: data.notes || "",
           internalNotes: data.internalNotes || "",
@@ -173,7 +175,7 @@ export default function ClientDetailsPage() {
         });
         setCallForm((current) => ({
           ...current,
-          leadStatus: data.leadStatus || "New Lead",
+          leadStatus: normalizeSalonCustomerStatus(data.leadStatus) || "New Customer",
           interestLevel: data.interestLevel || "Warm",
         }));
         setReminderForm((current) => ({
@@ -258,7 +260,7 @@ export default function ClientDetailsPage() {
       setReminders(reminderData.items || []);
       setCallForm({
         ...initialCallForm,
-        leadStatus: updatedClient.leadStatus || "New Lead",
+        leadStatus: normalizeSalonCustomerStatus(updatedClient.leadStatus) || "New Customer",
         interestLevel: updatedClient.interestLevel || "Warm",
       });
       refreshTimeline();
@@ -363,7 +365,9 @@ export default function ClientDetailsPage() {
     return "gold";
   };
 
-  const isTerminalLeadStatus = ["Lost", "Closed"].includes(callForm.leadStatus);
+  const isTerminalLeadStatus = ["Lost", "Service Completed", "Converted"].includes(
+    normalizeSalonCustomerStatus(callForm.leadStatus),
+  );
 
   if (loadError) {
     return (
@@ -384,12 +388,12 @@ export default function ClientDetailsPage() {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <p className="text-xs uppercase tracking-[0.3em] text-gold">{client.areaPreference || client.premiseArea || "Customer Pipeline"}</p>
+          <p className="text-xs uppercase tracking-[0.3em] text-gold">{client.areaPreference || client.premiseArea || "Preferred Branch"}</p>
           <h2 className="mt-2 font-display text-4xl">{client.ownerName}</h2>
           <p className="mt-2 text-sm text-muted">{client.clientPhoneNumber}</p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
-          <Badge tone="slate">{client.leadStatus || "New Customer"}</Badge>
+          <Badge tone="slate">{normalizeSalonCustomerStatus(client.leadStatus) || "New Customer"}</Badge>
           <Badge tone={getInterestLevelTone(client.interestLevel)}>{client.interestLevel || "Warm"}</Badge>
           <Badge tone="green">{client.assignedStaff?.name || "Unassigned"}</Badge>
           {canUpdateClients && !isSalesUser ? (
@@ -420,15 +424,14 @@ export default function ClientDetailsPage() {
             <div className="mt-5 grid gap-4  lg:grid-cols-3 md:grid-cols-2 sm:grid-cols-1">
               {[
                 ["Assigned Staff", client.assignedStaff?.name, UserCheck],
-                ["Customer Source", client.source, Shapes],
-                ["Purpose", client.purpose, ClipboardList],
-                ["Requirement Type", client.requirementType, Shapes],
-                ["Area Preference", client.areaPreference, MapPin],
-                ["Budget Range", formatBudgetRange(client.budgetMin, client.budgetMax), IndianRupee],
-                ["Last Call Status", client.lastCallStatus, Phone],
-                ["Next Reminder", client.nextFollowUpDate ? new Date(client.nextFollowUpDate).toLocaleDateString("en-IN") : "-", CalendarDays],
-                ["Premise Name", client.premiseName, Building2],
-                ["Premise Area", client.premiseArea, MapPin],
+                ["Source", client.source, Shapes],
+                [salonFormLabels.serviceInterested, client.requirementType || client.purpose, ClipboardList],
+                [salonFormLabels.preferredBranch, client.areaPreference, MapPin],
+                ["Expected Spend Range", formatBudgetRange(client.budgetMin, client.budgetMax), IndianRupee],
+                ["Last Interaction Status", client.lastCallStatus, Phone],
+                ["Next Follow-up", client.nextFollowUpDate ? new Date(client.nextFollowUpDate).toLocaleDateString("en-IN") : "-", CalendarDays],
+                ["Branch Name", client.premiseName, Building2],
+                ["Branch Location", client.premiseArea, MapPin],
               ].map(([label, value, Icon]) => (
                 <div key={label} className="rounded-3xl border border-white/10 bg-black/20 p-4">
                   <div className="flex items-center gap-2">
@@ -453,13 +456,13 @@ export default function ClientDetailsPage() {
                 ["Phone Number", client.clientPhoneNumber, Phone],
                 ["Email", client.email, Mail],
                 ["Address", client.address, MapPin],
-                ["Source of Customer", client.sourceOfProperty, Shapes],
-                ["Service Type", client.propertyType, Sparkles],
-                ["Customer Status", client.propertyStatus, Shapes],
-                ["Owner Price", client.ownerPrice?.toLocaleString("en-IN"), IndianRupee],
-                ["Service Condition", client.propertyCondition, Shapes],
-                ["Customer Age", client.propertyAge, ScrollText],
-                ["Service Size", client.propertySize, Ruler],
+                ["Source", client.sourceOfProperty, Shapes],
+                [salonFormLabels.customerType, client.propertyType, Sparkles],
+                [salonFormLabels.customerStatus, normalizeSalonCustomerStatus(client.propertyStatus) || client.propertyStatus, Shapes],
+                ["Expected Spend", client.ownerPrice?.toLocaleString("en-IN"), IndianRupee],
+                ["Service Preference", client.propertyCondition, Shapes],
+                ["Visit Frequency", client.propertyAge, ScrollText],
+                ["Package / Duration", client.propertySize, Ruler],
                 ["Date Added", client.dateOfAddingProperty ? new Date(client.dateOfAddingProperty).toLocaleDateString("en-IN") : "Not added", CalendarDays],
                 ["Created By", client.createdBy?.name, UserRound],
               ].map(([label, value, Icon]) => (
@@ -497,31 +500,31 @@ export default function ClientDetailsPage() {
                 />
               ) : null}
               <SelectDropdown
-                label="Customer Status"
-                options={leadStatusOptions}
+                label={salonFormLabels.customerStatus}
+                options={salonCustomerStatusOptions}
                 value={quickEdit.leadStatus}
                 onChange={(event) => setQuickEdit((current) => ({ ...current, leadStatus: event.target.value }))}
               />
               <SelectDropdown
-                label="Interest Level"
-                options={interestLevelOptions}
+                label={salonFormLabels.priorityLevel}
+                options={salonPriorityLevelOptions}
                 value={quickEdit.interestLevel}
                 onChange={(event) => setQuickEdit((current) => ({ ...current, interestLevel: event.target.value }))}
               />
               <FormInput
-                label="Last Call Status"
-                placeholder="Answered, no response, busy..."
+                label="Last Interaction Status"
+                placeholder="Contacted, no response, appointment planned..."
                 value={quickEdit.lastCallStatus}
                 onChange={(event) => setQuickEdit((current) => ({ ...current, lastCallStatus: event.target.value }))}
               />
               <FormInput
-                label="Next Reminder Date"
+                label="Next Follow-up Date"
                 type="date"
                 value={quickEdit.nextFollowUpDate}
                 onChange={(event) => setQuickEdit((current) => ({ ...current, nextFollowUpDate: event.target.value }))}
               />
               <FormInput
-                label="Customer Notes"
+                label={salonFormLabels.notes}
                 as="textarea"
                 rows={4}
                 className="lg:col-span-2"
@@ -568,15 +571,15 @@ export default function ClientDetailsPage() {
 
               <div className="grid gap-4 lg:grid-cols-2 md:grid-cols-2 sm:grid-cols-1">
                 <SelectDropdown
-                  label="Customer Status"
-                  options={leadStatusOptions}
+                  label={salonFormLabels.customerStatus}
+                  options={salonCustomerStatusOptions}
                   value={callForm.leadStatus}
                   onChange={(event) => updateCallForm("leadStatus", event.target.value)}
                   error={callErrors.leadStatus}
                 />
                 <SelectDropdown
-                  label="Interest Level"
-                  options={interestLevelOptions}
+                  label={salonFormLabels.priorityLevel}
+                  options={salonPriorityLevelOptions}
                   value={callForm.interestLevel}
                   onChange={(event) => updateCallForm("interestLevel", event.target.value)}
                   error={callErrors.interestLevel}
@@ -584,7 +587,7 @@ export default function ClientDetailsPage() {
               </div>
 
               <FormInput
-                label="Discussion Summary"
+                label="Consultation Summary"
                 as="textarea"
                 rows={4}
                 value={callForm.discussionSummary}
@@ -592,7 +595,7 @@ export default function ClientDetailsPage() {
                 error={callErrors.discussionSummary}
               />
               <FormInput
-                label="Requirement Note"
+                label={salonFormLabels.serviceInterested}
                 as="textarea"
                 rows={3}
                 value={callForm.requirementNote}
@@ -600,7 +603,7 @@ export default function ClientDetailsPage() {
                 error={callErrors.requirementNote}
               />
               <FormInput
-                label="Objection"
+                label="Customer Concern"
                 as="textarea"
                 rows={3}
                 value={callForm.objection}
@@ -617,7 +620,7 @@ export default function ClientDetailsPage() {
                 />
                 {!isTerminalLeadStatus ? (
                   <FormInput
-                    label="Next Reminder"
+                  label="Next Follow-up"
                     type="datetime-local"
                     value={callForm.nextFollowupDateTime}
                     onChange={(event) => updateCallForm("nextFollowupDateTime", event.target.value)}
@@ -632,7 +635,7 @@ export default function ClientDetailsPage() {
                   error={callErrors.reminderType}
                 />
                 <FormInput
-                  label="Call Duration (minutes)"
+                  label="Consultation Duration (minutes)"
                   type="number"
                   min="0"
                   value={callForm.callDuration}
@@ -683,7 +686,7 @@ export default function ClientDetailsPage() {
                       callLogs.map((callLog) => (
                         <tr key={callLog._id} className="border-t border-white/10 align-top">
                           <td className="px-3 py-3 text-muted">{formatDateTime(callLog.createdAt)}</td>
-                          <td className="px-3 py-3 text-ivory">{callLog.leadStatus}</td>
+                          <td className="px-3 py-3 text-ivory">{normalizeSalonCustomerStatus(callLog.leadStatus) || callLog.leadStatus}</td>
                           <td className="px-3 py-3 text-muted">{callLog.callConnected ? "Yes" : "No"}</td>
                           <td className="max-w-xs px-3 py-3 text-muted">{callLog.discussionSummary}</td>
                           <td className="max-w-xs px-3 py-3 text-muted">{callLog.lostReason || "-"}</td>
@@ -716,7 +719,7 @@ export default function ClientDetailsPage() {
               <div className="mt-5 grid gap-4">
                 {isReminderLocked ? (
                   <div className="rounded-2xl border border-amber-400/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-50">
-                    Complete the overdue reminder first before creating another reminder for this lead.
+                    Complete the overdue reminder first before creating another reminder for this customer.
                   </div>
                 ) : null}
                 <div className="grid gap-4 lg:grid-cols-2 md:grid-cols-2 sm:grid-cols-1">
@@ -939,7 +942,7 @@ export default function ClientDetailsPage() {
             <div className="rounded-3xl border border-white/10 bg-black/20 p-4">
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted">Reminder</p>
               <p className="mt-2 whitespace-pre-wrap break-words text-base font-medium text-ivory">
-                {client.lastCallStatus || "No call status added."}
+                {client.lastCallStatus || "No interaction status added."}
               </p>
               <p className="mt-2 text-sm text-muted">
                 Next follow-up: {client.nextFollowUpDate ? new Date(client.nextFollowUpDate).toLocaleDateString("en-IN") : "-"}

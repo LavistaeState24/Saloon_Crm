@@ -11,7 +11,6 @@ import {
   applyServerErrors,
   emailRules,
   getErrorMessage,
-  passwordRules,
   phoneRules,
   textRules,
 } from "../../../utils/validation";
@@ -153,7 +152,9 @@ export default function LoginPage() {
                     {showLoginPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 }
-                {...registerLogin("password", passwordRules())}
+                {...registerLogin("password", {
+                  required: "Password is required",
+                })}
               />
               {loginError ? <p className="text-sm text-rose-300">{loginError}</p> : null}
               <Button className="w-full" disabled={isLoginSubmitting} icon={ShieldCheck}>

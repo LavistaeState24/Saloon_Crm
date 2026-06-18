@@ -1,7 +1,6 @@
 import {
   throwIfValidationFailed,
   validateEmail,
-  validatePassword,
   validatePhone,
   validateRequiredText,
 } from "./common.js";
@@ -32,7 +31,7 @@ export const validateLoginInput = (payload) => {
   const errors = {};
   const sanitized = {
     email: validateEmail(errors, "email", payload.email),
-    password: validatePassword(errors, "password", payload.password),
+    password: validateRequiredText(errors, "password", payload.password, { label: "Password", min: 1, max: 255 }),
   };
 
   throwIfValidationFailed(errors);

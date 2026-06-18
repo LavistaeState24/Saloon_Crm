@@ -97,4 +97,56 @@ export const industryLabels = {
   },
 };
 
+export const salonFormLabels = {
+  customerName: "Customer Name",
+  serviceInterested: "Service Interested",
+  customerType: "Customer Type",
+  expectedSpendMin: "Expected Spend Min",
+  expectedSpendMax: "Expected Spend Max",
+  preferredBranch: "Preferred Branch",
+  customerStatus: "Customer Status",
+  priorityLevel: "Priority Level",
+  notes: "Notes",
+};
+
+export const salonCustomerTypeOptions = ["Walk-in", "Regular", "VIP", "Bridal", "Corporate"];
+export const salonServiceInterestedOptions = [
+  "Haircut",
+  "Hair Color",
+  "Facial",
+  "Cleanup",
+  "Spa",
+  "Makeup",
+  "Bridal Package",
+  "Nail Art",
+  "Grooming",
+];
+export const salonCustomerStatusOptions = [
+  "New Customer",
+  "Contacted",
+  "Appointment Planned",
+  "Service Completed",
+  "Follow-up Pending",
+  "Converted",
+  "Lost",
+];
+export const salonPriorityLevelOptions = ["Hot", "Warm", "Cold"];
+
+const customerStatusMap = {
+  "New Lead": "New Customer",
+  "Call Pending": "Contacted",
+  Connected: "Contacted",
+  "Requirement Taken": "Appointment Planned",
+  "Details Sent": "Contacted",
+  "Follow-up Pending": "Follow-up Pending",
+  Positive: "Appointment Planned",
+  "Site Visit Planned": "Appointment Planned",
+  Negotiation: "Follow-up Pending",
+  Booking: "Converted",
+  Closed: "Service Completed",
+  Lost: "Lost",
+};
+
+export const normalizeSalonCustomerStatus = (value) => customerStatusMap[value] || value || "";
+
 export const getIndustryLabel = (key, fallback = "") => industryLabelMap[key] || fallback || key;
