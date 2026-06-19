@@ -8,7 +8,7 @@ import Button from "../../../components/common/Button";
 import Modal from "../../../components/common/Modal";
 import { useCan } from "../../../hooks/useCan";
 import SearchFilter from "../../../components/common/SearchFilter";
-import { projectSearchTypeOptions } from "../../../constants/theme";
+import { serviceSearchCategories } from "../../../constants/theme";
 import { projectService } from "../../../services/projectService";
 
 const formatPropertyTypes = (value) => (Array.isArray(value) ? value.join(", ") : value || "");
@@ -124,7 +124,7 @@ export default function ProjectsPage() {
   const columns = [
     {
       key: "projectName",
-      label: "Service",
+      label: "Service Name",
       render: (row) => (
         <div>
           <p className="font-medium text-ivory">{row.projectName}</p>
@@ -133,10 +133,10 @@ export default function ProjectsPage() {
       ),
       searchValue: (row) => `${row.projectName} ${row.publicAlias}`,
     },
-    { key: "location", label: "Location" },
+    { key: "location", label: "Branch" },
     {
       key: "propertyType",
-      label: "BHK",
+      label: "Service Category",
       searchValue: (row) =>
         Array.isArray(row.propertyType)
           ? row.propertyType.join(" ")
@@ -149,20 +149,20 @@ export default function ProjectsPage() {
     },
     {
       key: "configuration",
-      label: "Category",
+      label: "Duration",
       searchValue: (row) => `${row.configuration || ""} ${formatPropertyTypes(row.requirementType)}`,
       render: (row) => row.configuration || formatPropertyTypes(row.requirementType),
     },
     {
       key: "priceRange",
-      label: "Price",
+      label: "Service Price",
       searchValue: (row) => `${row.priceRange?.min || ""} ${row.priceRange?.max || ""}`,
       render: (row) => formatPrice(row.priceRange),
     },
     {
       key: "status",
-      label: "Status",
-      render: (row) => <Badge tone={row.status === "active" ? "green" : "slate"}>{row.status}</Badge>,
+      label: "Service Availability",
+      render: (row) => <Badge tone={row.status === "Available" ? "green" : "slate"}>{row.status}</Badge>,
     },
     {
       key: "actions",
@@ -221,7 +221,7 @@ export default function ProjectsPage() {
 
       <SearchFilter
         {...filters}
-        propertyTypeOptions={projectSearchTypeOptions}
+        propertyTypeOptions={serviceSearchCategories}
         onSubmit={(formValues) => {
           setFilters(formValues);
           loadProjects(formValues);

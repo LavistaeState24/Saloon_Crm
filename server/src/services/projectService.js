@@ -50,19 +50,20 @@ export const buildClientSafeProjectPayload = (project, user, origin) => {
     publicAlias: project.publicAlias,
     location: project.location,
     area: project.area,
+    // Duration
     configuration: project.configuration || formatPropertyTypes(project.propertyType),
     size: project.sizeRange?.label
       ? project.sizeRange.label
       : project.sizeRange?.min && project.sizeRange?.max
-        ? `${project.sizeRange.min} - ${project.sizeRange.max} ${project.sizeRange.unit || "sqft"}`
+        ? `${project.sizeRange.min} - ${project.sizeRange.max} ${project.sizeRange.unit || "min"}`
         : null,
     priceRange: project.priceRange?.min
       ? project.priceRange.min === project.priceRange.max || !project.priceRange?.max
         ? `Rs${formatIndianCurrency(project.priceRange.min)}`
         : `Rs${formatIndianCurrency(project.priceRange.min)} - Rs${formatIndianCurrency(project.priceRange.max)}`
       : null,
-    possession: formatDate(project.possessionDate),
-    amenities: project.amenities || [],
+    availabilityDate: formatDate(project.possessionDate),
+    includes: project.amenities || [],
     brochureUrl,
     sampleVideoUrl: project.hasSampleVideo ? formatAssetUrl(origin, project.sampleVideoUrl) : null,
     photos,
@@ -111,7 +112,7 @@ export const getProjectById = async (projectId, currentUser) => {
   const project = await Project.findById(projectId).populate("createdBy", "name role");
 
   if (!project) {
-    throw new ApiError(404, "Project not found");
+    throw new ApiError(404, "Service not found");
   }
 
   assertDocumentScope(project, getModuleScope(currentUser, "projects"), currentUser, {
@@ -126,7 +127,7 @@ export const getClientSafeProjectShare = async (projectId, user, origin) => {
   const project = await Project.findById(projectId);
 
   if (!project) {
-    throw new ApiError(404, "Project not found");
+    throw new ApiError(404, "Service not found");
   }
 
   assertDocumentScope(project, getModuleScope(user, "projects"), user, {
@@ -141,7 +142,7 @@ export const updateProject = async (projectId, payload, currentUser) => {
   const project = await Project.findById(projectId);
 
   if (!project) {
-    throw new ApiError(404, "Project not found");
+    throw new ApiError(404, "Service not found");
   }
 
   assertDocumentScope(project, getModuleScope(currentUser, "projects"), currentUser, {
@@ -159,7 +160,7 @@ export const deleteProject = async (projectId, currentUser) => {
   const project = await Project.findById(projectId);
 
   if (!project) {
-    throw new ApiError(404, "Project not found");
+    throw new ApiError(404, "Service not found");
   }
 
   assertDocumentScope(project, getModuleScope(currentUser, "projects"), currentUser, {
@@ -175,9 +176,9 @@ export const getDashboardSummary = async (currentUser) => {
 
   if (projectsScope === "none") {
     return {
-      totalProjects: 0,
-      activeProjects: 0,
-      upcomingProjects: 0,
+      totalServices: 0,
+      availableServices: 0,
+      appointmentOnlyServices: 0,
     };
   }
 
@@ -186,15 +187,18 @@ export const getDashboardSummary = async (currentUser) => {
     own: ["createdBy"],
   });
 
-  const [totalProjects, activeProjects, upcomingProjects] = await Promise.all([
-  Project.countDocuments(projectFilters),
-    Project.countDocuments({ ...projectFilters, status: "active" }),
-    Project.countDocuments({ ...projectFilters, status: "upcoming" }),
+  const [totalServices, availableServices, appointmentOnlyServices] = await Promise.all([
+    Project.countDocuments(projectFilters),
+    Project.countDocuments({ ...projectFilters, status: "Available" }),
+    Project.countDocuments({
+      ...projectFilters,
+      status: "By Appointment Only",
+    }),
   ]);
 
   return {
-    totalProjects,
-    activeProjects,
-    upcomingProjects,
+    totalServices,
+    availableServices,
+    appointmentOnlyServices,
   };
 };

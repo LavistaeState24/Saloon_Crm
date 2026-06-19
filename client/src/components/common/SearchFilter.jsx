@@ -1,4 +1,4 @@
-import { Building2, Landmark, RotateCcw, Search, Wallet } from "lucide-react";
+import { Building2, Landmark, RotateCcw, Search, Wallet, Clock } from "lucide-react";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 
@@ -61,49 +61,53 @@ export default function SearchFilter({
       onSubmit={handleSubmit(onSubmit)}
     >
       <FormInput
-        label="Area"
+        label="Branch"
         icon={Landmark}
-        placeholder="e.g. Gota, Science City"
+        placeholder="e.g. Satellite, Navrangpura"
         error={getErrorMessage(errors.area)}
         {...register("area", {
-          ...textRules("Area", { min: 2, max: 80, required: false }),
-          validate: (value) => !value || value.length >= 2 || "Area must be at least 2 characters",
+          ...textRules("Branch", { min: 2, max: 80, required: false }),
+          validate: (value) => !value || value.length >= 2 || "Branch must be at least 2 characters",
         })}
       />
+
       <FormInput
-        label="BHK"
-        icon={Building2}
-        placeholder="e.g. 2 BHK, 3BHK"
+        label="Duration"
+        icon={Clock}
+        placeholder="e.g. 30 min, 60 min"
         error={getErrorMessage(errors.bhk)}
         {...register("bhk", {
-          ...textRules("BHK", { min: 3, max: 20, required: false }),
-          validate: (value) => !value || value.length >= 3 || "BHK must be at least 3 characters",
+          ...textRules("Duration", { min: 2, max: 20, required: false }),
+          validate: (value) => !value || value.length >= 2 || "Duration must be at least 2 characters",
         })}
       />
+
       <SelectDropdown
-        label="Category"
+        label="Service Category"
         icon={Building2}
         options={propertyTypeOptions}
-        placeholder="Select category"
+        placeholder="Select service category"
         error={getErrorMessage(errors.propertyType)}
         {...register("propertyType")}
       />
+
       <FormInput
-        label="Min Budget"
+        label="Min Price"
         icon={Wallet}
-        placeholder="e.g. 5000000"
+        placeholder="e.g. 500"
         error={getErrorMessage(errors.minBudget)}
-        {...register("minBudget", numberRules("Minimum budget", { required: false, min: 0 }))}
+        {...register("minBudget", numberRules("Minimum price", { required: false, min: 0 }))}
       />
+
       <FormInput
-        label="Max Budget"
+        label="Max Price"
         icon={Wallet}
-        placeholder="e.g. 15000000"
+        placeholder="e.g. 5000"
         error={getErrorMessage(errors.maxBudget)}
         {...register("maxBudget", {
-          ...numberRules("Maximum budget", { required: false, min: 0 }),
+          ...numberRules("Maximum price", { required: false, min: 0 }),
           validate: (value) => {
-            const baseValidation = numberRules("Maximum budget", { required: false, min: 0 }).validate(value);
+            const baseValidation = numberRules("Maximum price", { required: false, min: 0 }).validate(value);
 
             if (baseValidation !== true) {
               return baseValidation;
@@ -113,10 +117,11 @@ export default function SearchFilter({
               return true;
             }
 
-            return Number(value) >= Number(watchedMinBudget) || "Maximum budget must be at least minimum budget";
+            return Number(value) >= Number(watchedMinBudget) || "Maximum price must be at least minimum price";
           },
         })}
       />
+
       <div className="flex items-end gap-3 xl:flex-nowrap">
         <Button
           type="button"
@@ -130,6 +135,7 @@ export default function SearchFilter({
         >
           Reset
         </Button>
+
         <Button type="submit" className="w-full xl:w-auto" icon={Search} disabled={isSubmitting}>
           Search
         </Button>

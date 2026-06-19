@@ -28,29 +28,31 @@ const formatWhatsAppPhone = (phone) => {
 };
 
 const buildWhatsAppMessage = (safeProject) => {
-  const amenitiesValue = safeProject.amenities?.length ? safeProject.amenities.join(", ") : null;
+  const includesValue = safeProject.includes?.length ? safeProject.includes.join(", ") : null;
   const photosValue = safeProject.photos?.length ? safeProject.photos.join(", ") : null;
 
   const format = (label, value) => (value ? `• *${label}:* ${value}` : null);
 
   const lines = [
-    "*Premium Property Details by Lavista Estate*",
+    "*Salon Service Details*",
     "",
-    format("Area", safeProject.area),
-    format("Configuration", safeProject.configuration),
-    format("Size", safeProject.size),
-    format("Price Range", safeProject.priceRange),
-    format("Possession", safeProject.possession),
-    format("Basic Amenities", amenitiesValue),
-    format("Brochure", safeProject.brochureUrl),
-    format("Sample House Video", safeProject.sampleVideoUrl),
-    format("Photos", photosValue),
+    format("Branch", safeProject.location),
+    format("Branch Area", safeProject.area),
+    format("Service Category", safeProject.propertyType),
+    format("Duration", safeProject.configuration),
+    format("Service Duration / Session Time", safeProject.size),
+    format("Service Price", safeProject.priceRange),
+    format("Service Availability Date", safeProject.availabilityDate),
+    format("Includes", includesValue),
+    format("Service Brochure", safeProject.brochureUrl),
+    format("Service Video", safeProject.sampleVideoUrl),
+    format("Gallery", photosValue),
     "",
-    "*For more details, contact:*",
+    "*For Booking & Service Details:*",
     safeProject.contact?.name ? `*${safeProject.contact.name}*` : null,
     safeProject.contact?.phone || null,
     "",
-    "Lavista Estate | WhatsApp for site visit and latest availability",
+    "WhatsApp us for appointment booking and service availability",
   ];
 
   return lines.filter(Boolean).join("\n");
@@ -139,12 +141,12 @@ export default function ProjectDetailsPage() {
         sharedByName: user.name,
         sharedByPhone: user.phone,
         sharedFields: {
-          area: safeProject.area,
-          configuration: safeProject.configuration,
-          size: safeProject.size,
-          priceRange: safeProject.priceRange,
-          possession: safeProject.possession,
-          amenities: safeProject.amenities?.map((item) =>
+          branchArea: safeProject.area,
+          duration: safeProject.configuration,
+          sessionTime: safeProject.size,
+          servicePrice: safeProject.priceRange,
+          availabilityDate: safeProject.availabilityDate,
+          includes: safeProject.includes?.map((item) =>
             item.length > 100 ? item.slice(0, 90) + "..." : item
           ),
           brochureUrl: safeProject.brochureUrl,
@@ -193,7 +195,7 @@ export default function ProjectDetailsPage() {
           <Badge tone="green">{project.status}</Badge>
           {canCreateShareRecords ? (
             <Button onClick={() => setIsShareOpen(true)} icon={Link2}>
-              Share Client
+              Share Service
             </Button>
           ) : null}
         </div>
@@ -203,27 +205,27 @@ export default function ProjectDetailsPage() {
         <div className="rounded-[32px] border border-white/10 bg-white/5 p-6 shadow-glass">
           <div className="flex items-center gap-3">
             <Sparkles className="h-5 w-5 text-gold-2" />
-            <h3 className="font-display text-2xl">Project Details</h3>
+            <h3 className="font-display text-2xl">Service Details</h3>
           </div>
 
           <div className="mt-5 grid gap-4 md:grid-cols-2">
             {[
-              ["Project Name", project.projectName],
-              ["Client-safe Alias", project.publicAlias],
-              ["Location", project.location],
-              ["Area", project.area],
-              ["Property Type", formatPropertyTypes(project.propertyType)],
-              ["Configuration", project.configuration],
-              ["Size Range", project.sizeRange?.label || `${project.sizeRange?.min || "-"} - ${project.sizeRange?.max || "-"}`],
-              ["Price Range", formatPrice(project.priceRange)],
-              ["Total Plot Size", project.totalPlotSize],
-              ["Total Blocks", project.totalBlocks],
-              ["Total Units", project.totalUnits],
-              ["Available Units", project.availableUnits],
-              ["Possession Date", project.possessionDate ? new Date(project.possessionDate).toLocaleDateString("en-IN") : "Not added"],
-              ["Status", project.status],
-              ["Amenities", Array.isArray(project.amenities) ? project.amenities.join(", ") : project.amenities],
-              ["Sample House Video", sampleVideoUrl],
+              ["Service Name", project.projectName],
+              ["Display Name", project.publicAlias],
+              ["Branch", project.location],
+              ["Branch Area", project.area],
+              ["Service Category", formatPropertyTypes(project.propertyType)],
+              ["Duration", project.configuration],
+              ["Service Duration / Session Time", project.sizeRange?.label || `${project.sizeRange?.min || "-"} - ${project.sizeRange?.max || "-"}`],
+              ["Service Price", formatPrice(project.priceRange)],
+              ["Total Stock / Capacity", project.totalPlotSize],
+              ["Total Branches", project.totalBlocks],
+              ["Total Slots", project.totalUnits],
+              ["Available Slots", project.availableUnits],
+              ["Availability Date", project.possessionDate ? new Date(project.possessionDate).toLocaleDateString("en-IN") : "Not added"],
+              ["Service Availability", project.status],
+              ["Includes", Array.isArray(project.amenities) ? project.amenities.join(", ") : project.amenities],
+              ["Service Video", sampleVideoUrl],
             ].map(([label, value]) => (
               <div key={label} className="rounded-3xl border border-white/10 bg-black/20 p-4">
                 <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted">{label}</p>
@@ -241,10 +243,10 @@ export default function ProjectDetailsPage() {
 
           <div className="mt-5 space-y-4">
             {[
-              ["Builder Details", project.builderDetails],
+              ["Service Provider Details", project.builderDetails],
               ["Internal Notes", project.internalNotes],
-              ["Floor Plans", project.floorPlans?.length ? `${project.floorPlans.length} file(s) added` : ""],
-              ["Project Images", project.projectImages?.length ? `${project.projectImages.length} image(s) added` : ""],
+              ["Service Documents", project.floorPlans?.length ? `${project.floorPlans.length} file(s) added` : ""],
+              ["Service Images", project.projectImages?.length ? `${project.projectImages.length} image(s) added` : ""],
             ].map(([label, value]) => (
               <div key={label} className="rounded-3xl border border-white/10 bg-black/20 p-4">
                 <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted">{label}</p>
@@ -270,31 +272,31 @@ export default function ProjectDetailsPage() {
         </div>
       </div>
 
-      <Modal title="Share Client-Safe Details" isOpen={canCreateShareRecords && isShareOpen} onClose={() => setIsShareOpen(false)}>
+      <Modal title="Share Customer-Safe Service Details" isOpen={canCreateShareRecords && isShareOpen} onClose={() => setIsShareOpen(false)}>
         <form className="space-y-4" onSubmit={handleSubmit(handleWhatsAppShare)}>
           <FormInput
-            label="Client Name"
-            placeholder="Enter client name"
+            label="Customer Name"
+            placeholder="Enter customer name"
             error={getErrorMessage(errors.clientName)}
-            {...register("clientName", textRules("Client name", { min: 3, max: 60 }))}
+            {...register("clientName", textRules("Customer name", { min: 3, max: 60 }))}
           />
           <FormInput
-            label="Client WhatsApp Number"
+            label="Customer WhatsApp Number"
             placeholder="Enter 10 digit mobile number"
             error={getErrorMessage(errors.clientPhone)}
             {...register("clientPhone", phoneRules())}
           />
           <FormInput
-            label="Client Email"
-            placeholder="Enter client email"
+            label="Customer Email"
+            placeholder="Enter customer email"
             error={getErrorMessage(errors.clientEmail)}
             {...register("clientEmail", emailRules({ required: false }))}
           />
           <FormInput
-            label="Client Requirement"
-            placeholder="Optional client requirement"
+            label="Customer Service Requirement"
+            placeholder="Optional service requirement"
             error={getErrorMessage(errors.clientRequirement)}
-            {...register("clientRequirement", textRules("Client requirement", { min: 3, max: 200, required: false }))}
+            {...register("clientRequirement", textRules("Service requirement", { min: 3, max: 200, required: false }))}
           />
 
           <div className="rounded-2xl border border-white/10 bg-black/20 p-4 text-sm text-muted">

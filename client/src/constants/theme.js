@@ -1,114 +1,164 @@
+
+// ROLE
+
 export const roles = [
   { value: "super-admin", label: "Super Admin" },
-  { value: "admin", label: "Admin" },
-  { value: "manager", label: "Manager" },
-  { value: "sales", label: "Sales Executive" },
+  { value: "admin", label: "Salon Admin" },
+  { value: "manager", label: "Branch Manager" },
+  { value: "receptionist", label: "Receptionist" },
+  { value: "stylist", label: "Stylist" },
+  { value: "beautician", label: "Beautician" },
+  { value: "cashier", label: "Cashier" },
+  { value: "marketing", label: "Marketing Executive" },
+  { value: "inventory", label: "Inventory Manager" },
 ];
 
-export const leadStatusOptions = [
-  "New Lead",
-  "Call Pending",
-  "Connected",
-  "Requirement Taken",
-  "Details Sent",
+
+// CUSTOMER STATUS
+
+
+export const customerStatusOptions = [
+  "New Customer",
+  "Contacted",
+  "Appointment Planned",
+  "Service Completed",
   "Follow-up Pending",
-  "Positive",
-  "Site Visit Planned",
-  "Negotiation",
-  "Booking",
-  "Closed",
+  "Converted",
   "Lost",
 ];
 
-export const interestLevelOptions = ["Hot", "Warm", "Cold"];
-
-export const leadPurposeOptions = ["Buy", "Rent", "Lease", "Investment"];
-
-export const requirementTypeOptions = [
-  "1BHK",
-  "2BHK",
-  "2.5BHK",
-  "3BHK",
-  "4BHK",
-  "5BHK",
-  "6BHK",
-  "Villa",
-  "Plot",
-  "Land",
-  "Bunglow",
-  "Raw House",
-  "Tenament",
-  "Penthouse",
-  "Commercial",
-  "Apartment",
-  "Residential",
-  "Rental"
-,];
-
-export const propertySourceOptions = ["Owner", "Broker"];
-
-// lead form dropdown
-export const propertyTypes = [
- "1BHK",
-  "2BHK",
-  "2.5BHK",
-  "3BHK",
-  "4BHK",
-  "5BHK",
-  "6BHK",
-  "Villa",
-  "Plot",
-  "Land",
-  "Bunglow",
-  "Raw House",
-  "Tenament",
-  "Penthouse",
-  "Commercial",
-  "Apartment",
-  "Residential",
-  "Rental"
+export const customerStatuses = [
+  "new customer",
+  "contacted",
+  "appointment planned",
+  "service completed",
+  "follow-up pending",
+  "converted",
+  "lost",
 ];
 
-export const propertyConditionOptions = [
-  "Unfurnished",
-  "Semi Furnished",
-  "Furnished",
-  "Fully Furnished",
+// PRIORITY
+
+export const priorityLevelOptions = ["Hot", "Warm", "Cold"];
+
+// SERVICE INQUIRY
+
+export const serviceInquiryOptions = [
+  "Hair Service",
+  "Skin Service",
+  "Spa Service",
+  "Makeup Service",
+  "Bridal Service",
+  "Package Inquiry",
 ];
 
-export const propertyStatusOptions = [
+export const serviceInterestedOptions = [
+  "Haircut",
+  "Hair Color",
+  "Facial",
+  "Cleanup",
+  "Spa",
+  "Makeup",
+  "Bridal Package",
+  "Nail Art",
+  "Grooming",
+];
+
+// CUSTOMER SOURCE
+
+export const customerSourceOptions = [
+  "Walk-in",
+  "Referral",
+  "Instagram",
+  "Facebook",
+  "Google",
+  "WhatsApp",
+  "Phone",
+  "Website",
+];
+
+// CUSTOMER TYPES
+
+export const customerTypeOptions = [
+  "Walk-in",
+  "Regular",
+  "VIP",
+  "Bridal",
+  "Corporate",
+];
+
+
+// SERVICES
+
+
+export const serviceOptions = [
+  "Haircut",
+  "Hair Color",
+  "Facial",
+  "Cleanup",
+  "Spa",
+  "Makeup",
+  "Bridal Package",
+  "Nail Art",
+  "Grooming",
+];
+
+
+// PHASE 4 - SERVICE FORM
+
+export const serviceCategories = [
+  "Hair",
+  "Skin",
+  "Makeup",
+  "Spa",
+  "Nails",
+  "Bridal",
+  "Grooming",
+  "Package",
+];
+
+export const durationOptions = [
+  "15 min",
+  "30 min",
+  "45 min",
+  "60 min",
+  "90 min",
+  "120 min",
+];
+
+export const serviceAvailabilityOptions = [
   "Available",
-  "Hold",
-  "Sold",
-  "Rent Out",
   "Not Available",
+  "By Appointment Only",
 ];
 
-// project form dropdown
-export const projectPropertyTypes = [
-  "1BHK",
-  "2BHK",
-  "2.5BHK",
-  "3BHK",
-  "4BHK",
-  "5BHK",
-  "6BHK",
-  "Villa",
-  "Plot",
-  "Commercial"
+export const serviceSearchCategories = [
+  "Hair",
+  "Skin",
+  "Makeup",
+  "Spa",
+  "Nails",
+  "Bridal",
+  "Grooming",
+  "Package",
 ];
 
-export const projectSearchTypeOptions = [
-  "Apartment",
-  "Villa",
-  "Plot",
-  "Commercial",
-  "Duplex",
-  "Penthouse",
+
+// BACKWARD COMPATIBILITY
+
+export const propertyTypeOptions = serviceCategories;
+
+export const projectSearchTypeOptions = serviceSearchCategories;
+
+export const availabilityOptions = serviceAvailabilityOptions;
+
+// SHARE RECORDS
+
+export const shareRecordStatuses = [
+  "shared",
+  "interested",
+  "follow-up",
+  "site-visit",
+  "closed",
+  "not-interested",
 ];
-
-export const projectStatuses = ["active", "sold out", "upcoming"];
-
-export const clientStatuses = ["new", "interested", "site visit", "negotiation", "closed", "lost"];
-
-export const shareRecordStatuses = ["shared", "interested", "follow-up", "site-visit", "closed", "not-interested"];

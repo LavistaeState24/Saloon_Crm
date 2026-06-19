@@ -29,7 +29,7 @@ export const createShareRecord = async (payload, currentUser) => {
   const project = await Project.findById(payload.projectId);
 
   if (!project) {
-    throw new ApiError(404, "Project not found");
+    throw new ApiError(404, "Service not found");
   }
 
   assertDocumentScope(project, getModuleScope(currentUser, "projects"), currentUser, {
@@ -80,8 +80,7 @@ const syncShareRecordFollowupReminder = async (shareRecord, currentUser) => {
     relatedId: shareRecord._id,
   };
 
-  // Share records can be created without a direct client ObjectId.
-  // In that case, try to find the CRM lead by the shared client phone number.
+  // In that case, try to find the CRM customer by the shared customer phone number.
   let clientId = await resolveSharedRecordClientId(shareRecord);
 
   if (clientId && !shareRecord.client) {
@@ -92,7 +91,6 @@ const syncShareRecordFollowupReminder = async (shareRecord, currentUser) => {
     );
   }
 
-  // If there is still no matching CRM lead, we cannot create a Followup
   // because Followup.client is required in the Followup model.
   if (!clientId) {
     return;
@@ -100,7 +98,7 @@ const syncShareRecordFollowupReminder = async (shareRecord, currentUser) => {
 
   const reminderType = shareRecord.shareChannel === "Copy" ? "Details Send" : "WhatsApp";
 
-  // If follow-up date is removed from Shared History,
+ 
   // cancel the linked reminder instead of leaving an old pending reminder active.
   if (!shareRecord.followUpDate) {
     await Followup.findOneAndUpdate(reminderQuery, {
@@ -113,7 +111,6 @@ const syncShareRecordFollowupReminder = async (shareRecord, currentUser) => {
     return;
   }
 
-  // Create or update one reminder for this ShareRecord.
   // relatedModule + relatedId prevents duplicate reminders.
   await Followup.findOneAndUpdate(
     reminderQuery,
@@ -123,7 +120,7 @@ const syncShareRecordFollowupReminder = async (shareRecord, currentUser) => {
       project: shareRecord.projectId,
       assignedStaff: shareRecord.sharedBy,
       reminderType,
-      note: "Follow up after shared project details",
+      note: "Follow up after shared service details",
       reminderDateTime: shareRecord.followUpDate,
       dueDate: shareRecord.followUpDate,
       status: "Pending",

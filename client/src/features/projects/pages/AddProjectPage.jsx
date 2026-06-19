@@ -9,9 +9,9 @@ import MultiSelectDropdown from "../../../components/common/MultiSelectDropdown"
 import PageSkeleton from "../../../components/common/PageSkeleton";
 import SelectDropdown from "../../../components/common/SelectDropdown";
 import UploadBox from "../../../components/common/UploadBox";
-import { projectPropertyTypes, projectStatuses } from "../../../constants/theme";
+import { serviceCategories, durationOptions, serviceAvailabilityOptions } from "../../../constants/theme";
 import { projectService } from "../../../services/projectService";
-import { uploadService } from "../../../services/uploadService";;
+import { uploadService } from "../../../services/uploadService";
 import {
   applyServerErrors,
   dateRules,
@@ -30,7 +30,7 @@ const initialState = {
   area: "",
   propertyType: [],
   configuration: "",
-  sizeRange: { label: "", min: "", max: "", unit: "sqft" },
+  sizeRange: { label: "", min: "", max: "", unit: "min" },
   priceRange: { min: "", max: "", currencyLabel: "INR" },
   totalPlotSize: "",
   totalBlocks: "",
@@ -42,7 +42,7 @@ const initialState = {
   sampleVideoUrl: "",
   internalNotes: "",
   builderDetails: "",
-  status: "active",
+  status: "Available",
   brochure: null,
 };
 
@@ -55,71 +55,41 @@ const normalizePropertyTypeKey = (value) =>
     .toUpperCase();
 
 const projectPropertyTypeValueMap = new Map(
-  projectPropertyTypes.map((option) => [normalizePropertyTypeKey(option), option])
+  serviceCategories.map((option) => [normalizePropertyTypeKey(option), option])
 );
 
-const legacyPropertyTypeMap = {
-  "1 BHK": "1BHK",
-  "2 BHK": "2BHK",
-  "2bhk": "2BHK",
-  "2 bhk": "2BHK",
-  "3 BHK": "3BHK",
-  "3bhk": "3BHK",
-  "3 bhk": "3BHK",
-  "4 BHK": "4BHK",
-  "4bhk": "4BHK",
-  "4 bhk": "4BHK",
-};
-
-const normalizeProjectTypeItem = (item) => {
+const normalizeServiceCategoryItem = (item) => {
   const raw = String(item || "").trim();
-
   if (!raw) return "";
 
-  const compact = raw.toLowerCase().replace(/\s+/g, "");
-
-  const bhkMap = {
-    "1bhk": "1BHK",
-    "2bhk": "2BHK",
-    "2.5bhk": "2.5BHK",
-    "3bhk": "3BHK",
-    "4bhk": "4BHK",
-    "5bhk": "5BHK",
-    "6bhk": "6BHK",
-  };
-
-  return bhkMap[compact] || raw;
+  const normalizedKey = normalizePropertyTypeKey(raw);
+  return projectPropertyTypeValueMap.get(normalizedKey) || raw;
 };
 
-const normalizePropertyTypeValue = (value) => {
+const normalizeServiceCategoryValue = (value) => {
   if (Array.isArray(value)) {
-    return value.map(normalizeProjectTypeItem).filter(Boolean);
+    return value.map(normalizeServiceCategoryItem).filter(Boolean);
   }
 
   if (typeof value === "string") {
     return value
       .split(",")
-      .map(normalizeProjectTypeItem)
+      .map(normalizeServiceCategoryItem)
       .filter(Boolean);
   }
 
   return [];
 };
 
-const getProjectPropertyTypeSource = (project) => {
-  const propertyTypeValue = project?.propertyType;
+const getServiceCategorySource = (service) => {
+  const serviceCategoryValue = service?.propertyType;
 
-  if (Array.isArray(propertyTypeValue) && propertyTypeValue.length) {
-    return propertyTypeValue;
+  if (Array.isArray(serviceCategoryValue) && serviceCategoryValue.length) {
+    return serviceCategoryValue;
   }
 
-  if (typeof propertyTypeValue === "string" && propertyTypeValue.trim()) {
-    return propertyTypeValue;
-  }
-
-  const legacyConfiguration = String(project?.configuration || "").trim();
-  if (legacyConfiguration && /(\d+(?:\.\d+)?\s*BHK)|villa|plot|commercial/i.test(legacyConfiguration)) {
-    return legacyConfiguration;
+  if (typeof serviceCategoryValue === "string" && serviceCategoryValue.trim()) {
+    return serviceCategoryValue;
   }
 
   return [];
@@ -166,23 +136,18 @@ const formatCompactPrice = (value) => {
 };
 
 const mapProjectToForm = (project) => (
-
-  console.log(
-    "FORM PROPERTY TYPE:",
-    normalizePropertyTypeValue(project.propertyType)
-  ),
   {
     projectName: project.projectName || "",
     publicAlias: project.publicAlias || "",
     location: project.location || "",
     area: project.area || "",
-    propertyType: normalizePropertyTypeValue(getProjectPropertyTypeSource(project)),
+    propertyType: normalizeServiceCategoryValue(getServiceCategorySource(project)),
     configuration: project.configuration || "",
     sizeRange: {
       label: project.sizeRange?.label || "",
       min: project.sizeRange?.min?.toString() || "",
       max: project.sizeRange?.max?.toString() || "",
-      unit: project.sizeRange?.unit || "sqft",
+      unit: project.sizeRange?.unit || "min",
     },
     priceRange: {
       min: project.priceRange?.min?.toString() || "",
@@ -199,7 +164,7 @@ const mapProjectToForm = (project) => (
     sampleVideoUrl: project.sampleVideoUrl || "",
     internalNotes: project.internalNotes || "",
     builderDetails: project.builderDetails || "",
-    status: project.status || "active",
+    status: project.status || "Available",
     brochure: project.brochure || null,
   });
 
@@ -329,7 +294,7 @@ export default function AddProjectPage() {
 
       const payload = {
         ...formValues,
-        propertyType: normalizePropertyTypeValue(formValues.propertyType),
+        propertyType: normalizeServiceCategoryValue(formValues.propertyType),
         totalBlocks: toOptionalNumber(formValues.totalBlocks) ?? 0,
         totalUnits: toOptionalNumber(formValues.totalUnits) ?? 0,
         availableUnits: toOptionalNumber(formValues.availableUnits),
@@ -337,7 +302,7 @@ export default function AddProjectPage() {
           label: formValues.sizeRange.label,
           min: parsedSizeRange.min,
           max: parsedSizeRange.max,
-          unit: "sqft",
+          unit: "min",
         },
         priceRange: {
           min: normalizedPriceMin,
@@ -402,23 +367,23 @@ export default function AddProjectPage() {
         />
 
         <FormInput
-          label="Customer-safe Alias"
+          label="Display Name"
           icon={Building2}
-          placeholder="Enter customer-safe alias"
+          placeholder="Enter service display name"
           error={getErrorMessage(errors.publicAlias)}
-          {...register("publicAlias", textRules("Customer-safe alias", { min: 3, max: 100 }))}
+          {...register("publicAlias", textRules("Display name", { min: 3, max: 100 }))}
         />
 
         <FormInput
-          label="Location"
+          label="Branch"
           icon={MapPin}
-          placeholder="Enter project location"
+          placeholder="Enter branch name"
           error={getErrorMessage(errors.location)}
-          {...register("location", textRules("Location", { min: 2, max: 100 }))}
+          {...register("location", textRules("Branch", { min: 2, max: 100 }))}
         />
 
         <FormInput
-          label="Area"
+          label="Branch Area"
           icon={MapPin}
           placeholder="Enter area name"
           error={getErrorMessage(errors.area)}
@@ -431,12 +396,12 @@ export default function AddProjectPage() {
           defaultValue={[]}
           render={({ field }) => (
             <MultiSelectDropdown
-          label="Service / Unit Type"
-          icon={Shapes}
-          options={projectPropertyTypes}
-          placeholder="Select service type"
-          error={getErrorMessage(errors.propertyType)}
-          value={field.value || []}
+              label="Service Category"
+              icon={Shapes}
+              options={serviceCategories}
+              placeholder="Select service type"
+              error={getErrorMessage(errors.propertyType)}
+              value={field.value || []}
               onChange={field.onChange}
               onBlur={field.onBlur}
               name={field.name}
@@ -444,25 +409,26 @@ export default function AddProjectPage() {
           )}
         />
 
-        <FormInput
-          label="Service Category"
+        <SelectDropdown
+          label="Duration"
           icon={Shapes}
-          placeholder="Treatment / Package / Membership"
+          options={durationOptions}
+          placeholder="Select duration"
           error={getErrorMessage(errors.configuration)}
-          {...register("configuration", textRules("Service category", { min: 3, max: 60 }))}
+          {...register("configuration", selectRules("Duration"))}
         />
 
         <FormInput
-          label="Size"
-          placeholder="2400 to 3900 / 1200-1800 "
+          label="Service Duration / Session Time"
+          placeholder="Example: 30 min / 60 min / 90 min"
           error={getErrorMessage(errors.sizeRange?.label)}
-          {...register("sizeRange.label", textRules("Size", { min: 1, max: 50 }))}
+          {...register("sizeRange.label", textRules("Service duration", { min: 1, max: 50 }))}
         />
 
         <div className="space-y-2">
           <div className="grid gap-4 md:grid-cols-2">
             <FormInput
-              label="Min Price"
+              label="Min Service Price"
               icon={Wallet}
               type="number"
               placeholder="Optional minimum price"
@@ -470,7 +436,7 @@ export default function AddProjectPage() {
               {...register("priceRange.min", numberRules("Minimum price", { required: false, min: 1 }))}
             />
             <FormInput
-              label="Max Price"
+              label="Max Service Price"
               icon={Wallet}
               type="number"
               placeholder="Optional maximum price"
@@ -538,9 +504,9 @@ export default function AddProjectPage() {
           placeholder="Optional available slots"
           error={getErrorMessage(errors.availableUnits)}
           {...register("availableUnits", {
-            ...numberRules("Available units", { required: false, min: 0, integer: true }),
+            ...numberRules("Available slots", { required: false, min: 0, integer: true }),
             validate: (value) => {
-              const baseValidation = numberRules("Available units", { required: false, min: 0, integer: true }).validate(value);
+              const baseValidation = numberRules("Available slots", { required: false, min: 0, integer: true }).validate(value);
 
               if (baseValidation !== true) {
                 return baseValidation;
@@ -556,22 +522,22 @@ export default function AddProjectPage() {
         />
 
         <FormInput
-          label="Launch Date"
+          label="Availability Date"
           icon={CalendarDays}
           type="date"
           error={getErrorMessage(errors.possessionDate)}
-          {...register("possessionDate", dateRules("Launch date", { required: true }))}
+          {...register("possessionDate", dateRules("Availability date", { required: true }))}
         />
 
         <SelectDropdown
-          label="Status"
-          options={projectStatuses}
+          label="Service Availability"
+          options={serviceAvailabilityOptions}
           error={getErrorMessage(errors.status)}
-          {...register("status", selectRules("Status"))}
+          {...register("status", selectRules("Service availability"))}
         />
 
         <FormInput
-          label="Highlights"
+          label="Includes"
           className="lg:col-span-1"
           placeholder="Services, add-ons, perks"
           error={getErrorMessage(errors.amenities)}
@@ -579,7 +545,7 @@ export default function AddProjectPage() {
         />
 
         <div className="flex flex-col gap-2 lg:col-span-1">
-          <span className="text-md text-muted">Sample Service Video</span>
+          <span className="text-md text-muted">Service Video</span>
           <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
             <div className="flex flex-wrap items-center gap-6">
               <label className="flex items-center gap-3 text-sm text-ivory">
@@ -587,7 +553,7 @@ export default function AddProjectPage() {
                   type="radio"
                   value="true"
                   className="h-4 w-4 accent-[#c9a35d]"
-                  {...register("hasSampleVideo", { required: "Sample house video selection is required" })}
+                  {...register("hasSampleVideo", { required: "Service video selection is required" })}
                 />
                 <span>Add Video URL</span>
               </label>
@@ -596,7 +562,7 @@ export default function AddProjectPage() {
                   type="radio"
                   value="false"
                   className="h-4 w-4 accent-[#c9a35d]"
-                  {...register("hasSampleVideo", { required: "Sample house video selection is required" })}
+                  {...register("hasSampleVideo", { required: "Service video selection is required" })}
                 />
                 <span>No Video Available</span>
               </label>
@@ -616,7 +582,7 @@ export default function AddProjectPage() {
         </div>
 
         <FormInput
-          label="Provider Details"
+          label="Service Provider Details"
           className="lg:col-span-1"
           placeholder="Enter provider / brand details"
           error={getErrorMessage(errors.builderDetails)}
@@ -634,7 +600,7 @@ export default function AddProjectPage() {
         <div className="grid gap-4 md:grid-cols-2 lg:col-span-1 lg:grid-cols-1">
           <input type="hidden" {...register("brochure")} />
           <UploadBox
-            label="Brochure Upload"
+            label="Service Brochure Upload"
             helpText="Click to upload or drag and drop a PDF brochure up to 1000MB"
             asset={brochureAsset}
             uploading={isUploadingBrochure}

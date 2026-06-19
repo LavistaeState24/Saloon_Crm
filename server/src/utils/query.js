@@ -1,105 +1,84 @@
 const escapeRegex = (value) => String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
-const normalizePropertyTypeToken = (value) =>
-  String(value || "")
-    .trim()
-    .toLowerCase()
-    .replace(/\s+/g, "");
-
-const expandPropertyTypeCategory = (value) => {
-  const normalized = normalizePropertyTypeToken(value);
-
-  switch (normalized) {
-    case "apartment":
-      return ["1bhk", "2bhk", "2.5bhk", "3bhk", "4bhk", "5bhk", "1 bhk", "2 bhk", "2.5 bhk", "3 bhk", "4 bhk"];
-    case "villa":
-      return ["bungalow", "raw house", "tenament", "penthouse"];
-    case "plot":
-      return ["plot"];
-    case "commercial":
-      return ["office", "showroom", "commercial"];
-    default:
-      return [normalized];
-  }
-};
-
 export const buildProjectFilters = (query) => {
   const filters = {};
 
+  // Branch / Branch Area search
   if (query.area) {
-    const areaPattern = escapeRegex(query.area);
-    filters.$or = [{ area: { $regex: areaPattern, $options: "i" } }, { location: { $regex: areaPattern, $options: "i" } }];
+    const branchPattern = escapeRegex(query.area);
+
+    filters.$or = [
+      { area: { $regex: branchPattern, $options: "i" } },
+      { location: { $regex: branchPattern, $options: "i" } },
+    ];
   }
 
+  // Service Category
   if (query.propertyType) {
-    console.log("SELECTED CATEGORY:", query.propertyType);
-
-    const categoryMap = {
-      Apartment: ["Apartment"],
-      Villa: ["Villa", "Villa / Bungalow"],
-      Plot: ["Plot"],
-      Commercial: ["Commercial", "Office", "Showroom"],
-      Duplex: ["Duplex"],
-      Penthouse: ["Penthouse", "Penthouse + Duplex", "penthouse"],
-    };
-
-    const values = categoryMap[query.propertyType] || [query.propertyType];
-
-    filters.configuration = {
-      $in: values.map(
-        (value) => new RegExp(`^${escapeRegex(value)}$`, "i")
-      ),
+    filters.propertyType = {
+      $in: [new RegExp(`^${escapeRegex(query.propertyType)}$`, "i")],
     };
   }
 
+  // Duration
+  // Frontend still sends this as "bhk" for compatibility
   if (query.bhk) {
-    const bhkPattern = escapeRegex(query.bhk);
-
-    filters.propertyType = {
-      $regex: bhkPattern,
+    filters.configuration = {
+      $regex: escapeRegex(query.bhk),
       $options: "i",
     };
   }
 
+  // Service Availability
   if (query.status) {
     filters.status = query.status;
   }
 
+  // Available Slots
   if (query.availability === "true") {
     filters.availableUnits = { $gt: 0 };
   }
 
+  // Service Price
   if (query.minBudget || query.maxBudget) {
     filters["priceRange.min"] = {};
+
     if (query.minBudget) {
       filters["priceRange.min"].$gte = Number(query.minBudget);
     }
+
     if (query.maxBudget) {
       filters["priceRange.min"].$lte = Number(query.maxBudget);
     }
   }
 
+  // Service Duration / Session Time
   if (query.minSize || query.maxSize) {
     filters["sizeRange.min"] = {};
+
     if (query.minSize) {
       filters["sizeRange.min"].$gte = Number(query.minSize);
     }
+
     if (query.maxSize) {
       filters["sizeRange.min"].$lte = Number(query.maxSize);
     }
   }
 
+  // Availability Date
   if (query.possession) {
     filters.possessionDate = { $lte: new Date(query.possession) };
   }
 
+  // Includes
   if (query.amenities) {
-    const amenities = String(query.amenities)
+    const includes = String(query.amenities)
       .split(",")
       .map((item) => item.trim())
       .filter(Boolean);
-    if (amenities.length) {
-      filters.amenities = { $all: amenities };
+
+    if (includes.length) {
+      filters.amenities = { $all: includes };
     }
   }
 
@@ -109,5 +88,10 @@ export const buildProjectFilters = (query) => {
 export const buildPagination = (query) => {
   const page = Math.max(Number(query.page || 1), 1);
   const limit = Math.min(Math.max(Number(query.limit || 10), 1), 100);
-  return { page, limit, skip: (page - 1) * limit };
+
+  return {
+    page,
+    limit,
+    skip: (page - 1) * limit,
+  };
 };

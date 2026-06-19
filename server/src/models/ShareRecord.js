@@ -2,12 +2,12 @@ import mongoose from "mongoose";
 
 const sharedFieldsSchema = new mongoose.Schema(
   {
-    area: { type: String, trim: true, maxlength: 120 },
-    configuration: { type: String, trim: true, maxlength: 80 },
-    size: { type: String, trim: true, maxlength: 80 },
-    priceRange: { type: String, trim: true, maxlength: 120 },
-    possession: { type: String, trim: true, maxlength: 80 },
-    amenities: [{ type: String, trim: true, maxlength: 500 }],
+    branchArea: { type: String, trim: true, maxlength: 120 },
+    duration: { type: String, trim: true, maxlength: 80 },
+    sessionTime: { type: String, trim: true, maxlength: 80 },
+    servicePrice: { type: String, trim: true, maxlength: 120 },
+    availabilityDate: { type: String, trim: true, maxlength: 80 },
+    includes: [{ type: String, trim: true, maxlength: 500 }],
     brochureUrl: { type: String, trim: true, maxlength: 500, default: null },
     sampleVideoUrl: { type: String, trim: true, maxlength: 500, default: null },
     photos: [{ type: String, trim: true, maxlength: 500 }],
@@ -73,7 +73,7 @@ const shareRecordSchema = new mongoose.Schema(
     sharedAt: { type: Date, default: Date.now },
     status: {
       type: String,
-      enum: ["shared", "interested", "follow-up", "site-visit", "closed", "not-interested"],
+      enum: ["shared", "interested", "follow-up", "appointment", "closed", "not-interested"],
       default: "shared",
     },
     followUpDate: {

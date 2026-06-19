@@ -10,7 +10,7 @@ export const projectService = {
   listAll: async (params) => fetchAllPaginated((requestParams) => projectService.list(requestParams), params),
   create: async (payload) => {
     const { data } = await api.post("/projects", payload);
-    toast.success("Project created successfully");
+    toast.success("Service created successfully");
     return data.data;
   },
   getById: async (id) => {
@@ -19,12 +19,12 @@ export const projectService = {
   },
   update: async (id, payload) => {
     const { data } = await api.put(`/projects/${id}`, payload);
-    toast.success("Project updated successfully");
+    toast.success("Service deleted successfully");
     return data.data;
   },
   remove: async (id) => {
     const { data } = await api.delete(`/projects/${id}`);
-    toast.success("Project deleted successfully");
+    toast.success("Service deleted successfully");
     return data;
   },
   getClientShare: async (id) => {

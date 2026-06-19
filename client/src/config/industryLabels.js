@@ -34,15 +34,24 @@ export const industryLabels = {
   breadcrumbs: {
     dashboard: "Dashboard",
     projects: "Services",
+    project: "Service",
     clients: "Customers",
+    client: "Customer",
     leads: "Customers",
     followups: "Follow-ups",
     reminders: "Follow-ups",
     reports: "Reports",
     settings: "Settings",
     users: "Staff",
+    user: "Staff Member",
     deals: "Billing",
+    deal: "Invoice",
     siteVisits: "Appointments",
+    siteVisit: "Appointment",
+    new: "Add Service",
+    edit: "Edit Service",
+    booking: "Booking",
+    consultation: "Consultation",
   },
   navigation: {
     overview: "Dashboard",
@@ -130,23 +139,9 @@ export const salonCustomerStatusOptions = [
   "Converted",
   "Lost",
 ];
+
 export const salonPriorityLevelOptions = ["Hot", "Warm", "Cold"];
 
-const customerStatusMap = {
-  "New Lead": "New Customer",
-  "Call Pending": "Contacted",
-  Connected: "Contacted",
-  "Requirement Taken": "Appointment Planned",
-  "Details Sent": "Contacted",
-  "Follow-up Pending": "Follow-up Pending",
-  Positive: "Appointment Planned",
-  "Site Visit Planned": "Appointment Planned",
-  Negotiation: "Follow-up Pending",
-  Booking: "Converted",
-  Closed: "Service Completed",
-  Lost: "Lost",
-};
-
-export const normalizeSalonCustomerStatus = (value) => customerStatusMap[value] || value || "";
+export const normalizeSalonCustomerStatus = (value) => value || "";
 
 export const getIndustryLabel = (key, fallback = "") => industryLabelMap[key] || fallback || key;
