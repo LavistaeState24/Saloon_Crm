@@ -21,27 +21,32 @@ const siteVisitSchema = new mongoose.Schema(
       type: Date,
       required: true,
     },
+    // Staff Assigned / Assistance Required
     pickupRequired: {
       type: Boolean,
       default: false,
     },
+    // Appointment Status
     visitStatus: {
       type: String,
       required: true,
-      enum: ["Planned", "Done", "Cancelled", "Rescheduled"],
-      default: "Planned",
+      enum: ["Booked", "Confirmed", "Completed", "Cancelled", "No Show", "Rescheduled"],
+      default: "Booked",
     },
+    // Appointment Result
     postVisitResult: {
       type: String,
-      enum: ["Interested", "Negotiation", "Not Interested", "Revisit Required", ""],
+      enum: ["Service Completed", "Customer Interested", "Follow-up Required", "Rescheduled", "Cancelled", "No Show", ""],
       default: "",
     },
+    // Customer Feedback
     clientFeedback: {
       type: String,
       trim: true,
       maxlength: 1000,
       default: "",
     },
+    // Next Follow-up
     nextAction: {
       type: String,
       trim: true,
@@ -62,14 +67,14 @@ const siteVisitSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-siteVisitSchema.pre("validate", function validateDoneVisit(next) {
-  if (this.visitStatus === "Done") {
+siteVisitSchema.pre("validate", function validateCompletedAppointment(next) {
+  if (this.visitStatus === "Completed") {
     if (!this.clientFeedback || this.clientFeedback.trim().length < 3) {
-      this.invalidate("clientFeedback", "Client feedback is required when visit is Done.");
+      this.invalidate("clientFeedback", "Customer feedback is required when appointment is completed.");
     }
 
     if (!this.nextAction || this.nextAction.trim().length < 3) {
-      this.invalidate("nextAction", "Next action is required when visit is Done.");
+      this.invalidate("nextAction", "Next follow-up is required when appointment is completed.");
     }
   }
 

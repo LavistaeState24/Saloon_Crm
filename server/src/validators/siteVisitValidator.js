@@ -7,70 +7,79 @@ import {
   validateRequiredText,
 } from "./common.js";
 
-const visitStatuses = ["Planned", "Done", "Cancelled", "Rescheduled"];
+const appointmentStatuses = [
+  "Booked",
+  "Confirmed",
+  "Completed",
+  "Cancelled",
+  "No Show",
+  "Rescheduled",
+];
 
-const postVisitResults = [
-  "Interested",
-  "Negotiation",
-  "Not Interested",
-  "Revisit Required",
+const appointmentResults = [
+  "Service Completed",
+  "Customer Interested",
+  "Follow-up Required",
+  "Rescheduled",
+  "Cancelled",
+  "No Show",
 ];
 
 export const validateSiteVisitInput = (payload) => {
   const errors = {};
 
   const visitStatus =
-    validateEnum(errors, "visitStatus", payload.visitStatus || "Planned", {
-      label: "Visit status",
-      values: visitStatuses,
+    validateEnum(errors, "visitStatus", payload.visitStatus || "Booked", {
+      label: "Appointment status",
+      values: appointmentStatuses,
       required: false,
-    }) || "Planned";
+    }) || "Booked";
 
   const sanitized = {
     client: validateObjectId(errors, "client", payload.client || payload.leadId, {
-      label: "Client",
+      label: "Customer",
     }),
     project: validateObjectId(errors, "project", payload.project || payload.projectId, {
-      label: "Project",
+      label: "Service",
     }),
     assignedStaff: validateObjectId(errors, "assignedStaff", payload.assignedStaff, {
       label: "Assigned staff",
     }),
     visitDateTime: validateDate(errors, "visitDateTime", payload.visitDateTime, {
-      label: "Visit date/time",
+      label: "Appointment date/time",
       required: true,
     }),
     pickupRequired: Boolean(payload.pickupRequired),
     visitStatus,
     postVisitResult:
       validateEnum(errors, "postVisitResult", payload.postVisitResult, {
-        label: "Post visit result",
-        values: postVisitResults,
+        label: "Appointment result",
+        values: appointmentResults,
         required: false,
       }) || undefined,
     clientFeedback:
       validateOptionalText(errors, "clientFeedback", payload.clientFeedback, {
-        label: "Client feedback",
+        label: "Customer feedback",
         min: 3,
         max: 1000,
       }) || "",
     nextAction:
       validateOptionalText(errors, "nextAction", payload.nextAction, {
-        label: "Next action",
+        label: "Next follow-up",
         min: 3,
         max: 500,
       }) || "",
   };
 
-  if (visitStatus === "Done") {
+  if (visitStatus === "Completed") {
     sanitized.clientFeedback = validateRequiredText(errors, "clientFeedback", payload.clientFeedback, {
-      label: "Client feedback",
+      label: "Customer feedback",
       min: 3,
       max: 1000,
     });
 
     sanitized.nextAction = validateRequiredText(errors, "nextAction", payload.nextAction, {
-      label: "Next action",
+      label: "Next follow-up",
       min: 3,
       max: 500,
     });
@@ -86,13 +95,13 @@ export const validateSiteVisitUpdateInput = (payload) => {
 
   if (Object.prototype.hasOwnProperty.call(payload, "client") || Object.prototype.hasOwnProperty.call(payload, "leadId")) {
     sanitized.client = validateObjectId(errors, "client", payload.client || payload.leadId, {
-      label: "Client",
+      label: "Customer",
     });
   }
 
   if (Object.prototype.hasOwnProperty.call(payload, "project") || Object.prototype.hasOwnProperty.call(payload, "projectId")) {
     sanitized.project = validateObjectId(errors, "project", payload.project || payload.projectId, {
-      label: "Project",
+      label: "Service",
     });
   }
 
@@ -104,7 +113,7 @@ export const validateSiteVisitUpdateInput = (payload) => {
 
   if (Object.prototype.hasOwnProperty.call(payload, "visitDateTime")) {
     sanitized.visitDateTime = validateDate(errors, "visitDateTime", payload.visitDateTime, {
-      label: "Visit date/time",
+      label: "Appointment date/time",
       required: true,
     });
   }
@@ -115,16 +124,16 @@ export const validateSiteVisitUpdateInput = (payload) => {
 
   if (Object.prototype.hasOwnProperty.call(payload, "visitStatus")) {
     sanitized.visitStatus = validateEnum(errors, "visitStatus", payload.visitStatus, {
-      label: "Visit status",
-      values: visitStatuses,
+      label: "Appointment status",
+      values: appointmentStatuses,
     });
   }
 
   if (Object.prototype.hasOwnProperty.call(payload, "postVisitResult")) {
     sanitized.postVisitResult =
       validateEnum(errors, "postVisitResult", payload.postVisitResult, {
-        label: "Post visit result",
-        values: postVisitResults,
+        label: "Appointment result",
+        values: appointmentResults,
         required: false,
       }) || "";
   }
@@ -132,7 +141,7 @@ export const validateSiteVisitUpdateInput = (payload) => {
   if (Object.prototype.hasOwnProperty.call(payload, "clientFeedback")) {
     sanitized.clientFeedback =
       validateOptionalText(errors, "clientFeedback", payload.clientFeedback, {
-        label: "Client feedback",
+        label: "Customer feedback",
         min: 3,
         max: 1000,
       }) || "";
@@ -141,7 +150,7 @@ export const validateSiteVisitUpdateInput = (payload) => {
   if (Object.prototype.hasOwnProperty.call(payload, "nextAction")) {
     sanitized.nextAction =
       validateOptionalText(errors, "nextAction", payload.nextAction, {
-        label: "Next action",
+        label: "Next follow-up",
         min: 3,
         max: 500,
       }) || "";
@@ -149,18 +158,18 @@ export const validateSiteVisitUpdateInput = (payload) => {
 
   const finalStatus = sanitized.visitStatus || payload.visitStatus;
 
-  if (finalStatus === "Done") {
+  if (finalStatus === "Completed") {
     const feedback = sanitized.clientFeedback ?? payload.clientFeedback;
     const action = sanitized.nextAction ?? payload.nextAction;
 
     sanitized.clientFeedback = validateRequiredText(errors, "clientFeedback", feedback, {
-      label: "Client feedback",
+      label: "Customer feedback",
       min: 3,
       max: 1000,
     });
 
     sanitized.nextAction = validateRequiredText(errors, "nextAction", action, {
-      label: "Next action",
+      label: "Next follow-up",
       min: 3,
       max: 500,
     });
@@ -173,22 +182,25 @@ export const validateSiteVisitUpdateInput = (payload) => {
 export const validateSiteVisitListQuery = (payload) => {
   const errors = {};
   const sanitized = {
-    leadId: validateObjectId(errors, "leadId", payload.leadId || payload.clientId || payload.client, {
-      label: "Lead",
-      required: false,
-    }) || undefined,
-    projectId: validateObjectId(errors, "projectId", payload.projectId || payload.project, {
-      label: "Project",
-      required: false,
-    }) || undefined,
-    assignedStaff: validateObjectId(errors, "assignedStaff", payload.assignedStaff || payload.staff, {
-      label: "Assigned staff",
-      required: false,
-    }) || undefined,
+    leadId:
+      validateObjectId(errors, "leadId", payload.leadId || payload.clientId || payload.client, {
+        label: "Customer",
+        required: false,
+      }) || undefined,
+    projectId:
+      validateObjectId(errors, "projectId", payload.projectId || payload.project, {
+        label: "Service",
+        required: false,
+      }) || undefined,
+    assignedStaff:
+      validateObjectId(errors, "assignedStaff", payload.assignedStaff || payload.staff, {
+        label: "Assigned staff",
+        required: false,
+      }) || undefined,
     visitStatus:
       validateEnum(errors, "visitStatus", payload.visitStatus, {
-        label: "Visit status",
-        values: visitStatuses,
+        label: "Appointment status",
+        values: appointmentStatuses,
         required: false,
       }) || undefined,
     dateFrom: validateDate(errors, "dateFrom", payload.dateFrom, {
@@ -224,7 +236,7 @@ export const validateSiteVisitListQuery = (payload) => {
   }
 
   if (sanitized.pickupRequired === null) {
-    errors.pickupRequired = "Pickup required must be true or false";
+    errors.pickupRequired = "Staff assigned / assistance required must be true or false";
   }
 
   throwIfValidationFailed(errors);

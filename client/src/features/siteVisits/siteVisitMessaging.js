@@ -2,28 +2,34 @@ import { formatWhatsAppPhone } from "../../utils/whatsappMessage";
 
 export const buildSiteVisitConfirmationMessage = (siteVisit) => {
   const lines = [
-    "Lavista Estate Site Visit Confirmation",
+    "Lavista Salon Appointment Confirmation",
     "",
-    `Client: ${siteVisit.client?.ownerName || "-"}`,
-    `Project: ${siteVisit.project?.projectName || siteVisit.project?.publicAlias || "-"}`,
-    `Visit Time: ${new Date(siteVisit.visitDateTime).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}`,
+    `Customer: ${siteVisit.client?.ownerName || "-"}`,
+    `Service: ${siteVisit.project?.projectName || siteVisit.project?.publicAlias || "-"}`,
+    `Appointment Time: ${new Date(siteVisit.visitDateTime).toLocaleString("en-IN", {
+      dateStyle: "medium",
+      timeStyle: "short",
+    })}`,
     `Assigned Staff: ${siteVisit.assignedStaff?.name || "-"}`,
-    `Pickup Required: ${siteVisit.pickupRequired ? "Yes" : "No"}`,
+    `Assistance Required: ${siteVisit.pickupRequired ? "Yes" : "No"}`,
   ];
 
   if (siteVisit.visitStatus) {
-    lines.push(`Status: ${siteVisit.visitStatus}`);
+    lines.push(`Appointment Status: ${siteVisit.visitStatus}`);
   }
 
   if (siteVisit.clientFeedback) {
-    lines.push(`Feedback: ${siteVisit.clientFeedback}`);
+    lines.push(`Customer Feedback: ${siteVisit.clientFeedback}`);
   }
 
   if (siteVisit.nextAction) {
-    lines.push(`Next Action: ${siteVisit.nextAction}`);
+    lines.push(`Next Follow-up: ${siteVisit.nextAction}`);
   }
 
-  lines.push("", "Please confirm availability for the scheduled site visit.");
+  lines.push(
+    "",
+    "Please confirm your availability for the scheduled appointment."
+  );
 
   return lines.join("\n");
 };
