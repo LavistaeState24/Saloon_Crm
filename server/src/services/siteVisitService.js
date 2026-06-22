@@ -97,7 +97,7 @@ const assertValidAssignee = async (assignedStaff, client, currentUser) => {
   }
 
   if (currentUser.role === "sales" && toObjectIdString(user._id) !== toObjectIdString(currentUser._id)) {
-    throw new ApiError(403, "Sales users can only assign site visits to themselves");
+    throw new ApiError(403, "Staff can only assign appointments to themselves");
   }
 
   if (currentUser.role === "manager") {
@@ -105,7 +105,7 @@ const assertValidAssignee = async (assignedStaff, client, currentUser) => {
     const isManagedSales = user.role === "sales" && toObjectIdString(user.managerId) === toObjectIdString(currentUser._id);
 
     if (!isSelf && !isManagedSales) {
-      throw new ApiError(403, "Managers can only assign site visits to their own team");
+      throw new ApiError(403, "Managers can only assign appointments to their own team");
     }
   }
 
@@ -211,7 +211,7 @@ export const createSiteVisit = async (payload, userId, currentUser) => {
         module: "site-visits",
         message: "Super Admin bypassed overdue reminder lock",
         metadata: {
-          source: "site-visit-create",
+          source: "appointment-create",
         },
       })
     );
@@ -237,7 +237,7 @@ export const createSiteVisit = async (payload, userId, currentUser) => {
     newValues: {
       project: payload.project,
       visitDateTime: payload.visitDateTime,
-      visitStatus: payload.visitStatus || "Planned",
+      visitStatus: payload.visitStatus || "Booked",
       assignedStaff,
     },
   });
@@ -272,7 +272,7 @@ export const getSiteVisitById = async (siteVisitId, currentUser) => {
   const siteVisit = await populateSiteVisitUsers(SiteVisit.findById(siteVisitId));
 
   if (!siteVisit) {
-    throw new ApiError(404, "Site visit not found");
+    throw new ApiError(404, "Appointment not found");
   }
 
   await getAccessibleClient(siteVisit.client?._id || siteVisit.client, currentUser);
@@ -283,7 +283,7 @@ export const updateSiteVisit = async (siteVisitId, payload, currentUser) => {
   const siteVisit = await SiteVisit.findById(siteVisitId);
 
   if (!siteVisit) {
-    throw new ApiError(404, "Site visit not found");
+    throw new ApiError(404, "Appointment not found");
   }
 
   const client = await getAccessibleClient(siteVisit.client, currentUser);

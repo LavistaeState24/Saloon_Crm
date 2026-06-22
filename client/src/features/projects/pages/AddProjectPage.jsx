@@ -387,7 +387,7 @@ export default function AddProjectPage() {
           icon={MapPin}
           placeholder="Enter area name"
           error={getErrorMessage(errors.area)}
-          {...register("area", textRules("Area", { min: 2, max: 80 }))}
+          {...register("area", textRules("Branch area", { min: 2, max: 80 }))}
         />
 
         <Controller
@@ -541,7 +541,7 @@ export default function AddProjectPage() {
           className="lg:col-span-1"
           placeholder="Services, add-ons, perks"
           error={getErrorMessage(errors.amenities)}
-          {...register("amenities", textRules("Highlights", { min: 3, max: 300 }))}
+          {...register("amenities", textRules("Includes", { min: 3, max: 300 }))}
         />
 
         <div className="flex flex-col gap-2 lg:col-span-1">

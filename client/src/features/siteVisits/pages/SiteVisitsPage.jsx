@@ -30,7 +30,7 @@ const emptyFormValues = {
   assignedStaff: "",
   visitDateTime: "",
   pickupRequired: false,
-  visitStatus: "Planned",
+  visitStatus: "Booked",
   clientFeedback: "",
   nextAction: "",
   postVisitResult: "",
@@ -40,8 +40,8 @@ export default function SiteVisitsPage() {
   const canCreateSiteVisits = useCan("siteVisits", "create");
   const canUpdateSiteVisits = useCan("siteVisits", "update");
   const [siteVisits, setSiteVisits] = useState([]);
-  const [leadOptions, setLeadOptions] = useState([]);
-  const [projectOptions, setProjectOptions] = useState([]);
+  const [customerOptions, setCustomerOptions] = useState([]);
+  const [serviceOptions, setServiceOptions] = useState([]);
   const [staffOptions, setStaffOptions] = useState([]);
   const [filters, setFilters] = useState(initialFilters);
   const [isLoading, setIsLoading] = useState(true);
@@ -60,8 +60,14 @@ export default function SiteVisitsPage() {
 
     const [leadsData, projectsData, assignableUsers] = await Promise.all([clientService.listAll(), projectService.listAll(), userService.listAssignable()]);
 
-    setLeadOptions((leadsData.items || []).map((lead) => ({ value: lead._id, label: `${lead.ownerName} (${lead.clientPhoneNumber})` })));
-    setProjectOptions((projectsData.items || []).map((project) => ({ value: project._id, label: `${project.projectName} (${project.publicAlias})` })));
+    setCustomerOptions(
+      (leadsData.items || []).map((lead) => ({
+        value: lead._id,
+        label: `${lead.ownerName} (${lead.clientPhoneNumber})`,
+      }))
+    );
+
+    setServiceOptions((projectsData.items || []).map((project) => ({ value: project._id, label: `${project.projectName} (${project.publicAlias})` })));
     setStaffOptions(assignableUsers.map((user) => ({ value: user.id, label: `${user.name} (${user.role})` })));
   };
 
@@ -96,11 +102,11 @@ export default function SiteVisitsPage() {
   }, [canCreateSiteVisits, canUpdateSiteVisits]);
 
   const plannedRows = useMemo(
-    () => siteVisits.filter((siteVisit) => ["Planned", "Rescheduled", "Cancelled"].includes(siteVisit.visitStatus)),
+    () => siteVisits.filter((siteVisit) => ["Booked", "Confirmed", "Rescheduled", "Cancelled", "No Show"].includes(siteVisit.visitStatus)),
     [siteVisits],
   );
 
-  const doneRows = useMemo(() => siteVisits.filter((siteVisit) => siteVisit.visitStatus === "Done"), [siteVisits]);
+  const doneRows = useMemo(() => siteVisits.filter((siteVisit) => siteVisit.visitStatus === "Completed"), [siteVisits]);
 
   const toFormValues = (siteVisit) => ({
     leadId: siteVisit.leadId || siteVisit.client?._id || siteVisit.client || "",
@@ -108,7 +114,7 @@ export default function SiteVisitsPage() {
     assignedStaff: siteVisit.assignedStaff?._id || siteVisit.assignedStaff || "",
     visitDateTime: siteVisit.visitDateTime ? new Date(siteVisit.visitDateTime).toISOString().slice(0, 16) : "",
     pickupRequired: Boolean(siteVisit.pickupRequired),
-    visitStatus: siteVisit.visitStatus || "Planned",
+    visitStatus: siteVisit.visitStatus || "Booked",
     clientFeedback: siteVisit.clientFeedback || "",
     nextAction: siteVisit.nextAction || "",
     postVisitResult: siteVisit.postVisitResult || "",
@@ -152,14 +158,14 @@ export default function SiteVisitsPage() {
     },
     {
       key: "assignedStaff",
-      label: "Assigned",
+      label: "Assigned Staff",
       searchValue: (row) => row.assignedStaff?.name || "",
       render: (row) => row.assignedStaff?.name || "-",
     },
     {
       key: "pickupRequired",
-      label: "Pickup",
-      render: (row) => <Badge tone={row.pickupRequired ? "amber" : "slate"}>{row.pickupRequired ? "Required" : "No"}</Badge>,
+      label: "Assistance",
+      render: (row) => <Badge tone={row.pickupRequired ? "amber" : "slate"}>{row.pickupRequired ? "Required" : "Not Required"}</Badge>,
     },
     {
       key: "visitStatus",
@@ -168,7 +174,7 @@ export default function SiteVisitsPage() {
     },
     {
       key: "postVisitResult",
-      label: "Result",
+      label: "Appointment Result",
       render: (row) => row.postVisitResult || "-",
     },
     {
@@ -219,8 +225,8 @@ export default function SiteVisitsPage() {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <p className="text-xs uppercase tracking-[0.3em] text-gold">Appointment Desk</p>
-          <h2 className="mt-2 font-display text-3xl">Appointment planning, completion, and follow-through</h2>
+          <p className="text-xs uppercase tracking-[0.3em] text-gold">Salon Appointments</p>
+          <h2 className="mt-2 font-display text-3xl">Appointment scheduling, service completion, and customer follow-up</h2>
         </div>
         {canCreateSiteVisits ? (
           <Button
@@ -231,7 +237,7 @@ export default function SiteVisitsPage() {
               setIsFormOpen(true);
             }}
           >
-            Add Appointment
+            Book Appointment
           </Button>
         ) : null}
       </div>
@@ -250,7 +256,7 @@ export default function SiteVisitsPage() {
           onChange={(event) => setFilters((current) => ({ ...current, assignedStaff: event.target.value }))}
         />
         <SelectDropdown
-          label="Pickup Required"
+          label="Staff Assigned / Assistance Required"
           options={[
             { value: "true", label: "Required" },
             { value: "false", label: "Not Required" },
@@ -294,7 +300,7 @@ export default function SiteVisitsPage() {
         <div className="flex items-center justify-between gap-3">
           <div>
             <p className="text-xs uppercase tracking-[0.24em] text-gold">Planned Queue</p>
-            <h3 className="mt-2 font-display text-2xl">Planned, rescheduled, and cancelled visits</h3>
+            <h3 className="mt-2 font-display text-2xl">Booked, confirmed, rescheduled, and cancelled appointments</h3>
           </div>
           <Button type="button" variant="secondary" icon={RefreshCw} onClick={() => loadSiteVisits(filters)} disabled={isLoading}>
             {isLoading ? "Refreshing..." : "Refresh"}
@@ -314,7 +320,7 @@ export default function SiteVisitsPage() {
       <section className="space-y-4">
         <div>
           <p className="text-xs uppercase tracking-[0.24em] text-gold">Completed Appointments</p>
-          <h3 className="mt-2 font-display text-2xl">Done appointments and post-appointment results</h3>
+          <h3 className="mt-2 font-display text-2xl">Completed appointments and appointment results</h3>
         </div>
         <DataTable
           columns={columns}
@@ -328,7 +334,7 @@ export default function SiteVisitsPage() {
       </section>
 
       <Modal
-        title={editingSiteVisit ? "Edit Appointment" : "Add Appointment"}
+        title={editingSiteVisit ? "Edit Appointment" : "Book Appointment"}
         isOpen={isFormOpen}
         onClose={() => {
           if (!isSaving) {
@@ -342,11 +348,11 @@ export default function SiteVisitsPage() {
           {formError ? <p className="text-sm text-rose-300">{formError}</p> : null}
           <SiteVisitForm
             initialValues={editingSiteVisit ? toFormValues(editingSiteVisit) : emptyFormValues}
-            leadOptions={leadOptions}
-            projectOptions={projectOptions}
+            leadOptions={customerOptions}
+            projectOptions={serviceOptions}
             staffOptions={staffOptions}
             isSaving={isSaving}
-            saveLabel={editingSiteVisit ? "Update Appointment" : "Create Appointment"}
+            saveLabel={editingSiteVisit ? "Update Appointment" : "Book Appointment"}
             submitIcon={editingSiteVisit ? Pencil : CalendarPlus}
             onCancel={() => {
               setIsFormOpen(false);
@@ -368,7 +374,7 @@ export default function SiteVisitsPage() {
                 setEditingSiteVisit(null);
                 await loadSiteVisits(filters);
               } catch (requestError) {
-                setFormError(requestError.response?.data?.message || "Unable to save site visit");
+                setFormError(requestError.response?.data?.message || "Unable to save appointment");
                 throw requestError;
               } finally {
                 setIsSaving(false);
