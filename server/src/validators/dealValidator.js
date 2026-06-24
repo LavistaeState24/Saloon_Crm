@@ -9,7 +9,7 @@ import {
 } from "./common.js";
 
 const dealStatuses = ["Negotiation", "Booking", "Closed", "Cancelled"];
-const paymentStatuses = ["Pending", "Token Paid", "Partially Paid", "Paid", "Refunded"];
+const paymentStatuses = ["Pending", "Partial", "Paid", "Refunded"];
 
 const validateDocumentsPending = (value) => {
   if (value === true || value === "true" || value === 1 || value === "1") {
@@ -23,7 +23,7 @@ const validateDealCore = (payload, errors, { currentUser, isUpdate = false } = {
   const hasField = (field) => Object.prototype.hasOwnProperty.call(payload, field);
   const dealStatus =
     validateEnum(errors, "dealStatus", payload.dealStatus || (isUpdate ? undefined : "Negotiation"), {
-      label: "Deal status",
+      label: "Invoice status",
       values: dealStatuses,
       required: !isUpdate,
     }) || (isUpdate ? undefined : "Negotiation");
@@ -39,7 +39,7 @@ const validateDealCore = (payload, errors, { currentUser, isUpdate = false } = {
 
   if (!isUpdate || hasField("finalProject") || hasField("projectId")) {
     sanitized.finalProject = validateObjectId(errors, "finalProject", payload.finalProject || payload.projectId, {
-      label: "Final project",
+      label: "Final service",
       required: !isUpdate,
     });
   }
@@ -47,7 +47,7 @@ const validateDealCore = (payload, errors, { currentUser, isUpdate = false } = {
   if (hasField("finalUnit")) {
     sanitized.finalUnit =
       validateOptionalText(errors, "finalUnit", payload.finalUnit, {
-        label: "Final unit",
+        label: "Service / Package detail",
         min: 1,
         max: 100,
       }) || "";
@@ -55,7 +55,7 @@ const validateDealCore = (payload, errors, { currentUser, isUpdate = false } = {
 
   if (hasField("finalPrice")) {
     sanitized.finalPrice = validateNumber(errors, "finalPrice", payload.finalPrice, {
-      label: "Final price",
+      label: "Bill amount",
       required: false,
       min: 0,
     });
@@ -64,7 +64,7 @@ const validateDealCore = (payload, errors, { currentUser, isUpdate = false } = {
   if (hasField("brokerageDetails")) {
     sanitized.brokerageDetails =
       validateOptionalText(errors, "brokerageDetails", payload.brokerageDetails, {
-        label: "Brokerage details",
+        label: "Service notes",
         min: 3,
         max: 1000,
       }) || "";
@@ -72,7 +72,7 @@ const validateDealCore = (payload, errors, { currentUser, isUpdate = false } = {
 
   if (hasField("tokenAmount")) {
     sanitized.tokenAmount = validateNumber(errors, "tokenAmount", payload.tokenAmount, {
-      label: "Token amount",
+      label: "Advance paid",
       required: false,
       min: 0,
     });
@@ -80,7 +80,7 @@ const validateDealCore = (payload, errors, { currentUser, isUpdate = false } = {
 
   if (hasField("bookingDate")) {
     sanitized.bookingDate = validateDate(errors, "bookingDate", payload.bookingDate, {
-      label: "Booking date",
+      label: "Billing date",
       required: false,
     });
   }
@@ -100,7 +100,7 @@ const validateDealCore = (payload, errors, { currentUser, isUpdate = false } = {
 
   if (hasField("dealClosedBy") || (!isUpdate && dealStatus === "Closed")) {
     sanitized.dealClosedBy = validateObjectId(errors, "dealClosedBy", payload.dealClosedBy || currentUser?._id, {
-      label: "Deal closed by",
+      label: "Billed by",
       required: dealStatus === "Closed",
     }) || undefined;
   }
@@ -120,21 +120,21 @@ const validateDealCore = (payload, errors, { currentUser, isUpdate = false } = {
 
   if ((sanitized.dealStatus || dealStatus) === "Closed") {
     sanitized.finalPrice = validateNumber(errors, "finalPrice", sanitized.finalPrice ?? payload.finalPrice, {
-      label: "Final price",
+      label: "Bill amount",
       required: true,
       min: 0,
     });
     sanitized.brokerageDetails = validateRequiredText(errors, "brokerageDetails", sanitized.brokerageDetails ?? payload.brokerageDetails, {
-      label: "Brokerage details",
+      label: "Service notes",
       min: 3,
       max: 1000,
     });
     sanitized.bookingDate = validateDate(errors, "bookingDate", sanitized.bookingDate ?? payload.bookingDate, {
-      label: "Booking date",
+      label: "Billing date",
       required: true,
     });
     sanitized.dealClosedBy = validateObjectId(errors, "dealClosedBy", sanitized.dealClosedBy ?? payload.dealClosedBy ?? currentUser?._id, {
-      label: "Deal closed by",
+      label: "Billed by",
       required: true,
     });
   }
@@ -153,6 +153,7 @@ export const validateDealUpdateInput = (payload, currentUser) => {
 };
 
 export const validateDealListQuery = (payload) => {
+  console.log("Deal List Query:", payload);
   const errors = {};
   const sanitized = {
     leadId:
@@ -162,12 +163,12 @@ export const validateDealListQuery = (payload) => {
       }) || undefined,
     finalProject:
       validateObjectId(errors, "finalProject", payload.finalProject || payload.projectId || payload.project, {
-        label: "Final project",
+        label: "Final service",
         required: false,
       }) || undefined,
     dealStatus:
       validateEnum(errors, "dealStatus", payload.dealStatus || payload.status, {
-        label: "Deal status",
+        label: "Invoice status",
         values: dealStatuses,
         required: false,
       }) || undefined,
@@ -179,7 +180,7 @@ export const validateDealListQuery = (payload) => {
       }) || undefined,
     dealClosedBy:
       validateObjectId(errors, "dealClosedBy", payload.dealClosedBy, {
-        label: "Deal closed by",
+        label: "Billed by",
         required: false,
       }) || undefined,
     dateFrom: validateDate(errors, "dateFrom", payload.dateFrom, { label: "From date", required: false }) || undefined,
@@ -203,7 +204,7 @@ export const validateDealListQuery = (payload) => {
   };
 
   if (sanitized.documentsPending === null) {
-    errors.documentsPending = "Documents pending must be true or false";
+    errors.documentsPending = "Pending items must be true or false";
   }
 
   throwIfValidationFailed(errors);

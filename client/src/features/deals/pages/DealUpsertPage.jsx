@@ -177,7 +177,7 @@ export default function DealUpsertPage() {
     return (
       <div className="space-y-4">
         <p className="text-sm text-rose-300">{loadError}</p>
-        <Button variant="secondary" onClick={() => navigate("/deals/negotiation")}>
+        <Button variant="secondary" onClick={() => navigate("/deals/draft")}>
           Back to Billing
         </Button>
       </div>
@@ -189,7 +189,7 @@ export default function DealUpsertPage() {
       <div>
         <p className="text-xs uppercase tracking-[0.3em] text-gold">{isEditMode ? "Edit Invoice" : "New Invoice"}</p>
         <h2 className="mt-2 font-display text-3xl">{pageTitle}</h2>
-        <p className="mt-2 text-sm text-muted">Keep consultation, booking, and closure data in one place.</p>
+        <p className="mt-2 text-sm text-muted"> Manage customer billing, payments, services, and invoice records.</p>
       </div>
 
       {!isEditMode && isLeadReminderLocked ? (
@@ -213,7 +213,7 @@ export default function DealUpsertPage() {
           isLocked={!isEditMode && isLeadReminderLocked}
           saveLabel={isEditMode ? "Update Invoice" : "Create Invoice"}
           submitIcon={Save}
-          onCancel={() => navigate(isEditMode ? `/deals/${id}` : "/deals/negotiation")}
+          onCancel={() => navigate(isEditMode ? `/deals/${id}` : "/deals/draft")}
           formError={formError}
         />
       </form>

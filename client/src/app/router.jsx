@@ -21,6 +21,7 @@ const SiteVisitsPage = lazy(() => import("../features/siteVisits/pages/SiteVisit
 const DealNegotiationPage = lazy(() => import("../features/deals/pages/DealNegotiationPage"));
 const DealBookingsPage = lazy(() => import("../features/deals/pages/DealBookingsPage"));
 const DealClosedDealsPage = lazy(() => import("../features/deals/pages/DealClosedDealsPage"));
+const DealAllInvoicesPage = lazy(() => import("../features/deals/pages/DealAllInvoicesPage"));
 const DealRevenueSummaryPage = lazy(() => import("../features/deals/pages/DealRevenueSummaryPage"));
 const DealUpsertPage = lazy(() => import("../features/deals/pages/DealUpsertPage"));
 const DealDetailsPage = lazy(() => import("../features/deals/pages/DealDetailsPage"));
@@ -142,9 +143,17 @@ export const router = createBrowserRouter([
               </PermissionRoute>
             ),
           },
-          { path: "deals", element: <Navigate to="/deals/negotiation" replace /> },
+          { path: "deals", element: <Navigate to="/deals/all" replace /> },
           {
-            path: "deals/negotiation",
+            path: "deals/all",
+            element: withSuspense(
+              <PermissionRoute moduleKey="deals">
+                <DealAllInvoicesPage />
+              </PermissionRoute>
+            ),
+          },
+          {
+             path: "deals/draft",
             element: withSuspense(
               <PermissionRoute moduleKey="deals">
                 <DealNegotiationPage />
@@ -152,7 +161,7 @@ export const router = createBrowserRouter([
             ),
           },
           {
-            path: "deals/bookings",
+            path:"deals/issued",
             element: withSuspense(
               <PermissionRoute moduleKey="deals">
                 <DealBookingsPage />
@@ -160,7 +169,7 @@ export const router = createBrowserRouter([
             ),
           },
           {
-            path: "deals/closed",
+            path: "deals/paid",
             element: withSuspense(
               <PermissionRoute moduleKey="deals">
                 <DealClosedDealsPage />

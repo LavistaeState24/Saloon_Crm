@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
-    "test": "node test/reminderLock.test.js",
+    "test": "node test/reminderLock.test.js && node test/dealInvoice.test.js",
     "seed:users": "node src/seeds/seedUsers.js"
   },
   "dependencies": {

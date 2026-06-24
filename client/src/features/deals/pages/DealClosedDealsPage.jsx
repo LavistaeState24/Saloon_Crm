@@ -3,10 +3,10 @@ import DealPipelinePage from "./DealPipelinePage";
 export default function DealClosedDealsPage() {
   return (
     <DealPipelinePage
-      status="Closed"
-      statusLabel="Closed"
-      title="Closed Invoices"
-      subtitle="Review closed wins, pricing outcomes, and closure ownership."
+      status="Paid"
+      statusLabel="Paid"
+      title="Paid Invoices"
+      subtitle="Review completed bills, collected payments, and staff performance."
     />
   );
 }

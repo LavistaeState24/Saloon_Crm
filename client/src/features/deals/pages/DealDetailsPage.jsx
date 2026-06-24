@@ -7,21 +7,28 @@ import Button from "../../../components/common/Button";
 import PageSkeleton from "../../../components/common/PageSkeleton";
 import { useCan } from "../../../hooks/useCan";
 import { dealService } from "../../../services/dealService";
-import { formatCurrency, formatDate, formatDateTime, getDealStatusTone, getPaymentStatusTone } from "../dealConfig";
+import {
+  formatCurrency,
+  formatDate,
+  formatDateTime,
+  getDealStatusLabel,
+  getDealStatusTone,
+  getPaymentStatusTone,
+} from "../dealConfig";
 
 const infoItems = (deal) => [
   ["Customer", deal.lead?.ownerName || "-"],
   ["Customer Phone", deal.lead?.clientPhoneNumber || "-"],
-  ["Service", deal.project?.projectName || "-"],
-  ["Alias", deal.project?.publicAlias || "-"],
-  ["Unit", deal.finalUnit || "-"],
-  ["Final Price", formatCurrency(deal.finalPrice)],
-  ["Token Amount", formatCurrency(deal.tokenAmount)],
-  ["Booking Date", formatDate(deal.bookingDate)],
+  ["Final Service", deal.project?.projectName || "-"],
+  ["Service Alias", deal.project?.publicAlias || "-"],
+  ["Service / Package Detail", deal.finalUnit || "-"],
+  ["Bill Amount", formatCurrency(deal.finalPrice)],
+  ["Advance Paid", formatCurrency(deal.tokenAmount)],
+  ["Billing Date", formatDate(deal.bookingDate)],
   ["Payment Status", deal.paymentStatus || "-"],
-  ["Documents Pending", deal.documentsPending ? "Yes" : "No"],
-  ["Closed By", deal.closedBy?.name || "-"],
-  ["Deal Status", deal.dealStatus || "-"],
+  ["Pending Items", deal.documentsPending ? "Yes" : "No"],
+  ["Billed By", deal.closedBy?.name || "-"],
+  ["Invoice Status", getDealStatusLabel(deal.dealStatus)],
 ];
 
 export default function DealDetailsPage() {
@@ -48,8 +55,8 @@ export default function DealDetailsPage() {
     return (
       <div className="space-y-4">
         <p className="text-sm text-rose-300">{loadError}</p>
-        <Button variant="secondary" onClick={() => navigate("/deals/negotiation")}>
-          Back to Billing
+        <Button variant="secondary" onClick={() => navigate("/deals/draft")}>
+          Back to Invoices
         </Button>
       </div>
     );
@@ -68,7 +75,7 @@ export default function DealDetailsPage() {
           <p className="mt-2 text-sm text-muted">{deal.project?.projectName || "Service not attached"}</p>
         </div>
         <div className="flex flex-wrap gap-3">
-          <Badge tone={getDealStatusTone(deal.dealStatus)}>{deal.dealStatus}</Badge>
+          <Badge tone={getDealStatusTone(deal.dealStatus)}>{getDealStatusLabel(deal.dealStatus)}</Badge>
           <Badge tone={getPaymentStatusTone(deal.paymentStatus)}>{deal.paymentStatus || "Pending"}</Badge>
           {canUpdateDeals ? (
             <Link to={`/deals/${id}/edit`}>
@@ -106,7 +113,7 @@ export default function DealDetailsPage() {
               ["Updated By", deal.updatedBy?.name || "-"],
               ["Updated At", formatDateTime(deal.updatedAt)],
               ["Notes", deal.notes || "-"],
-              ["Brokerage Details", deal.brokerageDetails || "-"],
+              ["Service Notes", deal.brokerageDetails || "-"],
             ].map(([label, value]) => (
               <div key={label} className="rounded-3xl border border-white/10 bg-black/20 p-4">
                 <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted">{label}</p>

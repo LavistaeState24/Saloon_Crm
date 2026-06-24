@@ -75,9 +75,10 @@ export default function AdvancedDataTable({
 
   const totalRows = filteredRows.length;
   const resolvedTotalRecords = typeof totalRecords === "number" ? totalRecords : rows.length;
-  const totalPages = Math.max(1, Math.ceil(totalRows / rowsPerPage));
-  const pageStartIndex = totalRows === 0 ? 0 : (currentPage - 1) * rowsPerPage;
-  const pageEndIndex = Math.min(pageStartIndex + rowsPerPage, totalRows);
+  const effectiveRowsPerPage = Number(rowsPerPage) || 1;
+  const totalPages = Math.max(1, Math.ceil(totalRows / effectiveRowsPerPage));
+  const pageStartIndex = totalRows === 0 ? 0 : (currentPage - 1) * effectiveRowsPerPage;
+  const pageEndIndex = Math.min(pageStartIndex + effectiveRowsPerPage, totalRows);
   const paginatedRows = filteredRows.slice(pageStartIndex, pageEndIndex);
 
   useEffect(() => {
@@ -150,7 +151,7 @@ export default function AdvancedDataTable({
           </thead>
           <tbody className="divide-y divide-white/5 text-sm text-ivory">
             {loading ? (
-              Array.from({ length: Math.min(rowsPerPage, 5) }).map((_, index) => (
+              Array.from({ length: Math.min(effectiveRowsPerPage, 5) }).map((_, index) => (
                 <tr key={`loading-${index}`} className="animate-pulse">
                   {columns.map((column) => (
                     <td key={column.key} className="px-4 py-3 align-top sm:px-5 sm:py-4">

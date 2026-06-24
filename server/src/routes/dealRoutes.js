@@ -16,9 +16,9 @@ import { authorize, protect } from "../middlewares/authMiddleware.js";
 const router = Router();
 
 router.get("/", protect, authorize("deals", "view"), listDealsHandler);
-router.get("/negotiation", protect, authorize("deals", "view"), listNegotiationDealsHandler);
-router.get("/bookings", protect, authorize("deals", "view"), listBookingDealsHandler);
-router.get("/closed", protect, authorize("deals", "view"), listClosedDealsHandler);
+router.get("/draft", protect, authorize("deals", "view"), listNegotiationDealsHandler);
+router.get("/issued", protect, authorize("deals", "view"), listBookingDealsHandler);
+router.get("/paid", protect, authorize("deals", "view"), listClosedDealsHandler);
 router.get("/summary", protect, authorize("dealReports", "view"), getRevenueSummaryHandler);
 router.get("/staff-reports", protect, authorize("dealReports", "view"), getStaffClosingReportsHandler);
 router.post("/", protect, authorize("deals", "create"), createDealHandler);

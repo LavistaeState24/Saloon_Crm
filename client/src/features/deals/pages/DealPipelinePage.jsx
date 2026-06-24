@@ -9,7 +9,14 @@ import FormInput from "../../../components/common/FormInput";
 import SelectDropdown from "../../../components/common/SelectDropdown";
 import { useCan } from "../../../hooks/useCan";
 import { dealService } from "../../../services/dealService";
-import { formatCurrency, formatDate, getDealStatusTone, getPaymentStatusTone, paymentStatusOptions } from "../dealConfig";
+import {
+  formatCurrency,
+  formatDate,
+  getDealStatusLabel,
+  getDealStatusTone,
+  getPaymentStatusTone,
+  paymentStatusOptions,
+} from "../dealConfig";
 
 const initialFilters = {
   search: "",
@@ -17,6 +24,13 @@ const initialFilters = {
   documentsPending: "",
   dateFrom: "",
   dateTo: "",
+};
+
+const statusMap = {
+  Draft: "Negotiation",
+  Issued: "Booking",
+  Paid: "Closed",
+  Cancelled: "Cancelled",
 };
 
 export default function DealPipelinePage({ title, subtitle, status, statusLabel }) {
@@ -36,12 +50,13 @@ export default function DealPipelinePage({ title, subtitle, status, statusLabel 
     try {
       const data = await dealService.listAll({
         ...nextFilters,
-        dealStatus: status || undefined,
+        dealStatus: statusMap[status] || status || undefined,
       });
+
       setRows(data.items || []);
       setTotalRecords(data.meta?.total ?? data.items?.length ?? 0);
     } catch (requestError) {
-      setListError(requestError.response?.data?.message || "Unable to load billing records");
+      setListError(requestError.response?.data?.message || "Unable to load invoices");
     } finally {
       setIsLoading(false);
     }
@@ -74,38 +89,50 @@ export default function DealPipelinePage({ title, subtitle, status, statusLabel 
         </div>
       ),
     },
-    { key: "finalUnit", label: "Unit", render: (row) => row.finalUnit || "-" },
+    {
+      key: "finalUnit",
+      label: "Service / Package Detail",
+      render: (row) => row.finalUnit || "-",
+    },
     {
       key: "finalPrice",
-      label: "Price",
+      label: "Bill Amount",
       searchValue: (row) => `${row.finalPrice || ""}`,
       render: (row) => formatCurrency(row.finalPrice),
     },
     {
       key: "tokenAmount",
-      label: "Token",
+      label: "Advance Paid",
       render: (row) => formatCurrency(row.tokenAmount),
     },
     {
       key: "paymentStatus",
-      label: "Payment",
-      render: (row) => <Badge tone={getPaymentStatusTone(row.paymentStatus)}>{row.paymentStatus || "-"}</Badge>,
+      label: "Payment Status",
+      render: (row) => (
+        <Badge tone={getPaymentStatusTone(row.paymentStatus)}>
+          {row.paymentStatus || "-"}
+        </Badge>
+      ),
     },
     {
       key: "bookingDate",
-      label: "Booking Date",
+      label: "Billing Date",
       render: (row) => formatDate(row.bookingDate),
     },
     {
       key: "dealClosedBy",
-      label: "Closed By",
+      label: "Billed By",
       searchValue: (row) => row.closedBy?.name || row.dealClosedBy?.name || "",
       render: (row) => row.closedBy?.name || row.dealClosedBy?.name || "-",
     },
     {
       key: "dealStatus",
-      label: "Status",
-      render: (row) => <Badge tone={getDealStatusTone(row.dealStatus)}>{row.dealStatus}</Badge>,
+      label: "Invoice Status",
+      render: (row) => (
+        <Badge tone={getDealStatusTone(row.dealStatus)}>
+          {getDealStatusLabel(row.dealStatus)}
+        </Badge>
+      ),
     },
     {
       key: "actions",
@@ -117,18 +144,19 @@ export default function DealPipelinePage({ title, subtitle, status, statusLabel 
             type="button"
             className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-muted transition hover:border-gold/50 hover:bg-gold/10 hover:text-gold-2"
             onClick={() => navigate(`/deals/${row._id}`)}
-            title="View deal"
-            aria-label="View deal"
+            title="View invoice"
+            aria-label="View invoice"
           >
             <Eye className="h-3.5 w-3.5" />
           </button>
+
           {canUpdateDeals ? (
             <Link to={`/deals/${row._id}/edit`}>
               <button
                 type="button"
                 className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-muted transition hover:border-gold/50 hover:bg-gold/10 hover:text-gold-2"
-                title="Edit deal"
-                aria-label="Edit deal"
+                title="Edit invoice"
+                aria-label="Edit invoice"
               >
                 <Pencil className="h-3.5 w-3.5" />
               </button>
@@ -143,17 +171,27 @@ export default function DealPipelinePage({ title, subtitle, status, statusLabel 
     <div className="space-y-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <p className="text-xs uppercase tracking-[0.3em] text-gold">Billing / Invoices</p>
+          <p className="text-xs uppercase tracking-[0.3em] text-gold">
+            Billing / Invoices
+          </p>
           <h2 className="mt-2 font-display text-3xl">{title}</h2>
           <p className="mt-2 max-w-3xl text-sm text-muted">{subtitle}</p>
         </div>
+
         <div className="flex flex-wrap gap-3">
-          <Button type="button" variant="secondary" icon={RefreshCw} onClick={() => loadDeals(filters)} disabled={isLoading}>
+          <Button
+            type="button"
+            variant="secondary"
+            icon={RefreshCw}
+            onClick={() => loadDeals(filters)}
+            disabled={isLoading}
+          >
             {isLoading ? "Refreshing..." : "Refresh"}
           </Button>
+
           {canCreateDeals ? (
             <Link to="/deals/new">
-            <Button icon={Plus}>New Invoice</Button>
+              <Button icon={Plus}>Create Invoice</Button>
             </Link>
           ) : null}
         </div>
@@ -162,37 +200,52 @@ export default function DealPipelinePage({ title, subtitle, status, statusLabel 
       <div className="grid gap-4 rounded-[28px] border border-white/10 bg-white/5 p-5 shadow-glass md:grid-cols-2 xl:grid-cols-5">
         <FormInput
           label="Search"
-          placeholder="Customer, service, unit, note..."
+          placeholder="Customer, service, package, notes..."
           value={filters.search}
-          onChange={(event) => setFilters((current) => ({ ...current, search: event.target.value }))}
+          onChange={(event) =>
+            setFilters((current) => ({ ...current, search: event.target.value }))
+          }
         />
+
         <SelectDropdown
           label="Payment Status"
           options={paymentStatusOptions}
           value={filters.paymentStatus}
-          onChange={(event) => setFilters((current) => ({ ...current, paymentStatus: event.target.value }))}
+          onChange={(event) =>
+            setFilters((current) => ({ ...current, paymentStatus: event.target.value }))
+          }
         />
+
         <SelectDropdown
-          label="Documents"
+          label="Pending Items"
           options={[
             { value: "true", label: "Pending" },
-            { value: "false", label: "Ready" },
+            { value: "false", label: "Clear" },
           ]}
           value={filters.documentsPending}
-          onChange={(event) => setFilters((current) => ({ ...current, documentsPending: event.target.value }))}
+          onChange={(event) =>
+            setFilters((current) => ({ ...current, documentsPending: event.target.value }))
+          }
         />
+
         <FormInput
-          label="From"
+          label="Billing From"
           type="date"
           value={filters.dateFrom}
-          onChange={(event) => setFilters((current) => ({ ...current, dateFrom: event.target.value }))}
+          onChange={(event) =>
+            setFilters((current) => ({ ...current, dateFrom: event.target.value }))
+          }
         />
+
         <FormInput
-          label="To"
+          label="Billing To"
           type="date"
           value={filters.dateTo}
-          onChange={(event) => setFilters((current) => ({ ...current, dateTo: event.target.value }))}
+          onChange={(event) =>
+            setFilters((current) => ({ ...current, dateTo: event.target.value }))
+          }
         />
+
         <div className="flex items-end gap-3 xl:col-span-5">
           <Button
             type="button"
@@ -205,11 +258,8 @@ export default function DealPipelinePage({ title, subtitle, status, statusLabel 
           >
             Reset Filters
           </Button>
-          <Button
-            type="button"
-            className="w-full"
-            onClick={() => loadDeals(filters)}
-          >
+
+          <Button type="button" className="w-full" onClick={() => loadDeals(filters)}>
             Apply Filters
           </Button>
         </div>
@@ -222,8 +272,8 @@ export default function DealPipelinePage({ title, subtitle, status, statusLabel 
         rows={rows}
         totalRecords={totalRecords}
         loading={isLoading}
-        emptyMessage={`No ${statusLabel.toLowerCase()} invoices found.`}
-        searchPlaceholder={`Search ${statusLabel.toLowerCase()} invoices...`}
+        emptyMessage={statusLabel ? `No ${statusLabel.toLowerCase()} invoices found.` : "No invoices found."}
+        searchPlaceholder={statusLabel ? `Search ${statusLabel.toLowerCase()} invoices...` : "Search invoices..."}
         defaultRowsPerPage={10}
       />
     </div>
