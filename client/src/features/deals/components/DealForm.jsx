@@ -29,11 +29,27 @@ export default function DealForm({
   return (
     <div className="space-y-5">
       <div className="grid gap-5 lg:grid-cols-2">
-        <SelectDropdown label="Invoice Status" options={dealStatusOptions} error={errors.dealStatus?.message} {...register("dealStatus")} />
-        <SelectDropdown label="Customer" options={leadSelectOptions} error={errors.leadId?.message} {...register("leadId")} />
-        <SelectDropdown label="Final Service" options={projectSelectOptions} error={errors.finalProject?.message} {...register("finalProject")} />
-        <FormInput label="Final Unit" placeholder="Tower 2, 1403" error={errors.finalUnit?.message} {...register("finalUnit")} />
-        <FormInput label="Token Amount" type="number" placeholder="Enter token amount" error={errors.tokenAmount?.message} {...register("tokenAmount")} />
+        <SelectDropdown label="Invoice Status" placeholder="Select invoice status" options={dealStatusOptions} error={errors.dealStatus?.message} {...register("dealStatus")} />
+
+        <SelectDropdown label="Customer" placeholder="Select customer" options={leadSelectOptions} error={errors.leadId?.message} {...register("leadId")} />
+
+        <SelectDropdown label="Final Service" placeholder="Select final service"  options={projectSelectOptions} error={errors.finalProject?.message} {...register("finalProject")} />
+
+        <FormInput
+          label="Service / Package Detail"
+          placeholder="Hair Spa Package / Bridal Makeup"
+          error={errors.finalUnit?.message}
+          {...register("finalUnit")}
+        />
+
+        <FormInput
+          label="Advance Paid"
+          type="number"
+          placeholder="Enter advance paid"
+          error={errors.tokenAmount?.message}
+          {...register("tokenAmount")}
+        />
+
         <SelectDropdown
           label="Payment Status"
           options={paymentStatusOptions}
@@ -41,13 +57,14 @@ export default function DealForm({
           {...register("paymentStatus")}
         />
         <FormInput
-          label="Booking Date"
+          label="Billing Date"
           type="date"
           error={errors.bookingDate?.message}
           {...register("bookingDate")}
         />
+
         <SelectDropdown
-          label="Invoice Closed By"
+          label="Billed By"
           options={closerSelectOptions}
           error={errors.dealClosedBy?.message}
           {...register("dealClosedBy")}
@@ -57,17 +74,17 @@ export default function DealForm({
       {showClosedFields ? (
         <div className="grid gap-5 rounded-[28px] lg:grid-cols-2">
           <FormInput
-            label="Final Price"
+            label="Bill Amount"
             type="number"
-            placeholder="Enter final price"
+            placeholder="Enter bill amount"
             error={errors.finalPrice?.message}
             {...register("finalPrice")}
           />
           <FormInput
-            label="Commission Details"
+            label="Service Notes"
             as="textarea"
-            rows={4}
-            placeholder="Brokerage split, commission, and terms"
+            rows={1}
+            placeholder="Service details, products used, package notes"
             error={errors.brokerageDetails?.message}
             {...register("brokerageDetails")}
           />
@@ -75,17 +92,17 @@ export default function DealForm({
       ) : (
         <div className="grid gap-5 rounded-[28px] lg:grid-cols-2">
           <FormInput
-            label="Final Price"
+            label="Bill Amount"
             type="number"
-            placeholder="Enter agreed final price"
+            placeholder="Enter bill amount"
             error={errors.finalPrice?.message}
             {...register("finalPrice")}
           />
           <FormInput
-            label="Commission Details"
+            label="Service Notes"
             as="textarea"
             rows={4}
-            placeholder="Brokerage split, commission, and terms"
+            placeholder="Service details, products used, package notes"
             error={errors.brokerageDetails?.message}
             {...register("brokerageDetails")}
           />
@@ -93,15 +110,15 @@ export default function DealForm({
       )}
 
       <div className="grid gap-5 lg:grid-cols-2">
-        <label className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-1">
+        <label className="flex items-top gap-3 rounded-2xl">
           <input type="checkbox" className="h-4 w-4 accent-[#c9a35d]" {...register("documentsPending")} />
-          <span className="text-sm text-ivory">Documents pending</span>
+          <span className="text-sm text-ivory">Pending Items</span>
         </label>
         <FormInput
           label="Notes"
           as="textarea"
           rows={1}
-          placeholder="Internal notes"
+          placeholder="Pending payment, customer request, product note"
           error={errors.notes?.message}
           {...register("notes")}
         />

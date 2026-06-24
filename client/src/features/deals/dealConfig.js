@@ -1,6 +1,22 @@
-export const dealStatusOptions = ["Negotiation", "Booking", "Closed", "Cancelled"];
+export const dealStatusOptions = [
+  { value: "Negotiation", label: "Draft" },
+  { value: "Booking", label: "Issued" },
+  { value: "Closed", label: "Paid" },
+  { value: "Cancelled", label: "Cancelled" },
+];
 
-export const paymentStatusOptions = ["Pending", "Token Paid", "Partially Paid", "Paid", "Refunded"];
+export const paymentStatusOptions = ["Pending", "Partial", "Paid", "Refunded"];
+
+export const getDealStatusLabel = (status) => {
+  const labels = {
+    Negotiation: "Draft",
+    Booking: "Issued",
+    Closed: "Paid",
+    Cancelled: "Cancelled",
+  };
+
+  return labels[status] || status || "-";
+};
 
 export const getDealStatusTone = (status) => {
   if (status === "Closed") return "green";
@@ -11,7 +27,7 @@ export const getDealStatusTone = (status) => {
 
 export const getPaymentStatusTone = (status) => {
   if (status === "Paid") return "green";
-  if (status === "Partially Paid" || status === "Token Paid") return "amber";
+  if (status === "Partial") return "amber";
   if (status === "Refunded") return "rose";
   return "slate";
 };
@@ -26,7 +42,13 @@ export const formatCurrency = (value) => {
   return amount.toLocaleString("en-IN");
 };
 
-export const formatDate = (value) => (value ? new Date(value).toLocaleDateString("en-IN") : "-");
+export const formatDate = (value) =>
+  value ? new Date(value).toLocaleDateString("en-IN") : "-";
 
 export const formatDateTime = (value) =>
-  value ? new Date(value).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" }) : "-";
+  value
+    ? new Date(value).toLocaleString("en-IN", {
+        dateStyle: "medium",
+        timeStyle: "short",
+      })
+    : "-";

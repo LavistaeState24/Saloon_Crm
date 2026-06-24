@@ -114,8 +114,8 @@ const assertValidCloser = async (dealClosedBy, currentUser) => {
   const closerId = dealClosedBy || currentUser._id;
   const user = await User.findOne({ _id: closerId, isActive: true }).select("_id role managerId");
 
-  if (!user || user.role === "super-admin") {
-    throw new ApiError(400, "Deal closed by is invalid");
+  if (!user) {
+    throw new ApiError(400, "Billed by is invalid");
   }
 
   if (currentUser.role === "sales" && toObjectIdString(user._id) !== toObjectIdString(currentUser._id)) {
@@ -134,18 +134,6 @@ const assertValidCloser = async (dealClosedBy, currentUser) => {
   return user._id;
 };
 
-const ensureNoDuplicateActiveDeal = async (leadId, currentDealId = null) => {
-  const activeDeal = await Deal.findOne({
-    leadId,
-    dealStatus: { $ne: "Cancelled" },
-    ...(currentDealId ? { _id: { $ne: currentDealId } } : {}),
-  }).select("_id dealStatus");
-
-  if (activeDeal) {
-    throw new ApiError(409, "An active deal already exists for this lead");
-  }
-};
-
 const updateLeadStatus = async (leadId, dealStatus) => {
   const lead = await Client.findById(leadId);
 
@@ -154,9 +142,9 @@ const updateLeadStatus = async (leadId, dealStatus) => {
   }
 
   const statusMap = {
-    Negotiation: "Negotiation",
-    Booking: "Booking",
-    Closed: "Closed",
+    Negotiation: "Appointment Planned",
+    Booking: "Service Completed",
+    Closed: "Converted",
     Cancelled: "Lost",
   };
 
@@ -222,28 +210,28 @@ const buildDealFilters = async (query = {}, currentUser) => {
     const pattern = new RegExp(escapeRegex(query.search), "i");
     const leadSearchFilter = Object.keys(leadVisibilityFilter).length
       ? {
-          $and: [
-            leadVisibilityFilter,
-            {
-              $or: [
-                { ownerName: pattern },
-                { clientPhoneNumber: pattern },
-                { premiseName: pattern },
-                { premiseArea: pattern },
-                { areaPreference: pattern },
-              ],
-            },
-          ],
-        }
+        $and: [
+          leadVisibilityFilter,
+          {
+            $or: [
+              { ownerName: pattern },
+              { clientPhoneNumber: pattern },
+              { premiseName: pattern },
+              { premiseArea: pattern },
+              { areaPreference: pattern },
+            ],
+          },
+        ],
+      }
       : {
-          $or: [
-            { ownerName: pattern },
-            { clientPhoneNumber: pattern },
-            { premiseName: pattern },
-            { premiseArea: pattern },
-            { areaPreference: pattern },
-          ],
-        };
+        $or: [
+          { ownerName: pattern },
+          { clientPhoneNumber: pattern },
+          { premiseName: pattern },
+          { premiseArea: pattern },
+          { areaPreference: pattern },
+        ],
+      };
 
     const [leadMatches, projectMatches] = await Promise.all([
       Client.find(leadSearchFilter).select("_id"),
@@ -316,8 +304,6 @@ export const createDeal = async (payload, currentUser) => {
 
   await assertProjectExists(payload.finalProject);
   const dealClosedBy = payload.dealStatus === "Closed" ? await assertValidCloser(payload.dealClosedBy, currentUser) : null;
-
-  await ensureNoDuplicateActiveDeal(lead._id);
 
   const deal = await Deal.create({
     ...payload,
@@ -425,8 +411,8 @@ export const updateDeal = async (dealId, payload, currentUser) => {
     nextPayload.dealClosedBy = await assertValidCloser(currentUser._id, currentUser);
   }
 
-  if (nextStatus !== "Cancelled") {
-    await ensureNoDuplicateActiveDeal(nextLeadId, deal._id);
+  if (nextStatus !== "Closed") {
+    nextPayload.dealClosedBy = null;
   }
 
   deal.set({
@@ -475,7 +461,7 @@ export const updateDeal = async (dealId, payload, currentUser) => {
         documentsPending: refreshedDeal.documentsPending,
         dealClosedBy: refreshedDeal.dealClosedBy,
       },
-        metadata: previousDeal.dealStatus !== nextStatus ? { description: `Deal status changed from ${previousDeal.dealStatus} to ${nextStatus}.` } : {},
+      metadata: previousDeal.dealStatus !== nextStatus ? { description: `Deal status changed from ${previousDeal.dealStatus} to ${nextStatus}.` } : {},
     }),
   ]);
 

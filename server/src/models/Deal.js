@@ -8,70 +8,83 @@ const dealSchema = new mongoose.Schema(
       required: true,
       index: true,
     },
+
     finalProject: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Project",
       required: true,
       index: true,
     },
+
     finalUnit: {
       type: String,
       trim: true,
       maxlength: 100,
       default: "",
     },
+
     finalPrice: {
       type: Number,
       min: 0,
       default: null,
     },
+
     brokerageDetails: {
       type: String,
       trim: true,
       maxlength: 1000,
       default: "",
     },
+
     tokenAmount: {
       type: Number,
       min: 0,
       default: 0,
     },
+
     bookingDate: {
       type: Date,
       default: null,
     },
+
     paymentStatus: {
       type: String,
       trim: true,
-      enum: ["Pending", "Token Paid", "Partially Paid", "Paid", "Refunded"],
+      enum: ["Pending", "Partial", "Paid", "Refunded"],
       default: "Pending",
     },
+
     documentsPending: {
       type: Boolean,
       default: false,
     },
+
     dealClosedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       default: null,
     },
+
     dealStatus: {
       type: String,
       trim: true,
       enum: ["Negotiation", "Booking", "Closed", "Cancelled"],
       default: "Negotiation",
     },
+
     notes: {
       type: String,
       trim: true,
       maxlength: 2000,
       default: "",
     },
+
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
+
     updatedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
@@ -84,22 +97,34 @@ const dealSchema = new mongoose.Schema(
 dealSchema.index({ leadId: 1, dealStatus: 1 });
 dealSchema.index({ dealStatus: 1, bookingDate: -1, createdAt: -1 });
 
-dealSchema.pre("validate", function validateClosedDeal(next) {
+dealSchema.pre("validate", function validatePaidInvoice(next) {
   if (this.dealStatus === "Closed") {
     if (this.finalPrice === null || this.finalPrice === undefined) {
-      this.invalidate("finalPrice", "Final price is required when deal is Closed");
+      this.invalidate(
+        "finalPrice",
+        "Bill amount is required when invoice is Paid"
+      );
     }
 
     if (!this.brokerageDetails || !String(this.brokerageDetails).trim()) {
-      this.invalidate("brokerageDetails", "Brokerage details are required when deal is Closed");
+      this.invalidate(
+        "brokerageDetails",
+        "Service notes are required when invoice is Paid"
+      );
     }
 
     if (!this.bookingDate) {
-      this.invalidate("bookingDate", "Booking date is required when deal is Closed");
+      this.invalidate(
+        "bookingDate",
+        "Billing date is required when invoice is Paid"
+      );
     }
 
     if (!this.dealClosedBy) {
-      this.invalidate("dealClosedBy", "Deal closed by is required when deal is Closed");
+      this.invalidate(
+        "dealClosedBy",
+        "Billed by is required when invoice is Paid"
+      );
     }
   }
 

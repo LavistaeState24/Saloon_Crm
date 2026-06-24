@@ -43,7 +43,7 @@ export const navigationItems = [
     actionKey: "view",
   },
   {
-    to: "/deals/closed",
+    to: "/deals/all",
     label: industryLabels.navigation.billing,
     icon: Receipt,
     moduleKey: "deals",

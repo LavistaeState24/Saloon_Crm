@@ -32,7 +32,7 @@ export default function DealRevenueSummaryPage() {
       setSummary(summaryData);
       setStaffReports(staffData || []);
     } catch (requestError) {
-      setLoadError(requestError.response?.data?.message || "Unable to load salon reports");
+      setLoadError(requestError.response?.data?.message || "Unable to load invoice reports");
     } finally {
       setIsLoading(false);
     }
@@ -51,18 +51,18 @@ export default function DealRevenueSummaryPage() {
   const columns = [
     { key: "closerName", label: "Staff" },
     { key: "closerRole", label: "Role" },
-    { key: "closedDeals", label: "Closed Deals" },
-    { key: "totalRevenue", label: "Revenue", render: (row) => formatCurrency(row.totalRevenue) },
-    { key: "totalTokens", label: "Token", render: (row) => formatCurrency(row.totalTokens) },
-    { key: "pendingDocuments", label: "Docs Pending", render: (row) => row.pendingDocuments || 0 },
+    { key: "closedDeals", label: "Paid Invoices" },
+    { key: "totalRevenue", label: "Invoice Value", render: (row) => formatCurrency(row.totalRevenue) },
+    { key: "totalTokens", label: "Advance Collected", render: (row) => formatCurrency(row.totalTokens) },
+    { key: "pendingDocuments", label: "Pending Items", render: (row) => row.pendingDocuments || 0 },
   ];
 
   return (
     <div className="space-y-6">
       <div>
-        <p className="text-xs uppercase tracking-[0.3em] text-gold">Deal Closing</p>
-        <h2 className="mt-2 font-display text-3xl">Salon Reports</h2>
-        <p className="mt-2 text-sm text-muted">Track closed value, token flow, and performance by staff.</p>
+        <p className="text-xs uppercase tracking-[0.3em] text-gold">Invoice Reports</p>
+        <h2 className="mt-2 font-display text-3xl">Salon Billing Reports</h2>
+        <p className="mt-2 text-sm text-muted">Track paid value, advance flow, and performance by staff.</p>
       </div>
 
       <div className="grid gap-4 rounded-[28px] border border-white/10 bg-white/5 p-5 shadow-glass md:grid-cols-2 xl:grid-cols-4">
@@ -103,23 +103,23 @@ export default function DealRevenueSummaryPage() {
 
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard label="Total Invoices" value={summary?.totalDeals ?? "--"} accent="gold" meta="Tracked" />
-        <StatCard label="Closed Invoices" value={summary?.closedDeals ?? "--"} accent="green" meta="Closed" />
-        <StatCard label="Total Revenue" value={formatCurrency(summary?.totalRevenue)} accent="wine" meta="Closed value" />
-        <StatCard label="Closing Rate" value={summary?.closingRate ?? "--"} accent="amber" meta="Performance" />
+        <StatCard label="Paid Invoices" value={summary?.closedDeals ?? "--"} accent="green" meta="Collected" />
+        <StatCard label="Total Billing" value={formatCurrency(summary?.totalRevenue)} accent="wine" meta="Paid value" />
+        <StatCard label="Collection Rate" value={summary?.closingRate ?? "--"} accent="amber" meta="Performance" />
       </section>
 
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="Current Month Revenue" value={formatCurrency(summary?.currentMonthRevenue)} accent="gold" meta="This month" />
-        <StatCard label="Tokens Collected" value={formatCurrency(summary?.totalTokens)} accent="blue" meta="Token flow" />
-        <StatCard label="Docs Pending" value={summary?.documentsPending ?? "--"} accent="rose" meta="Missing paperwork" />
-        <StatCard label="Month Closings" value={summary?.currentMonthBookings ?? "--"} accent="green" meta="Appointments in range" />
+        <StatCard label="Current Month Billing" value={formatCurrency(summary?.currentMonthRevenue)} accent="gold" meta="This month" />
+        <StatCard label="Advance Collected" value={formatCurrency(summary?.totalTokens)} accent="blue" meta="Advance flow" />
+        <StatCard label="Pending Items" value={summary?.documentsPending ?? "--"} accent="rose" meta="Missing paperwork" />
+        <StatCard label="Month Paid Invoices" value={summary?.currentMonthBookings ?? "--"} accent="green" meta="Services in range" />
       </section>
 
       <div className="rounded-[32px] border border-white/10 bg-white/5 p-6 shadow-glass">
         <div className="mb-4 flex items-center justify-between gap-3">
           <div>
             <p className="text-xs uppercase tracking-[0.24em] text-gold">Staff Reports</p>
-            <h3 className="mt-2 font-display text-2xl">Closer performance snapshot</h3>
+            <h3 className="mt-2 font-display text-2xl">Biller performance snapshot</h3>
           </div>
         </div>
         <DataTable

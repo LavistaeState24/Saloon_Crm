@@ -9,9 +9,34 @@ const customerSourceOptions = [
   "WhatsApp",
   "Phone",
   "Website",
+  "Owner",
+  "Builder",
+  "Broker",
 ];
 
-const customerTypeOptions = ["Walk-in", "Regular", "VIP", "Bridal", "Corporate"];
+const customerTypeOptions = [
+  "Walk-in",
+  "Regular",
+  "VIP",
+  "Bridal",
+  "Corporate",
+
+  "Apartment",
+  "Villa",
+  "Plot",
+  "Commercial",
+  "Bunglow",
+  "Bungalow",
+
+  "1BHK",
+  "2BHK",
+  "2.5BHK",
+  "3BHK",
+  "4BHK",
+  "5BHK",
+  "6BHK",
+  "Penthouse",
+];
 
 const customerStatusOptions = [
   "New Customer",
@@ -21,6 +46,9 @@ const customerStatusOptions = [
   "Follow-up Pending",
   "Converted",
   "Lost",
+  "Available",
+  "Sold",
+  "Hold",
 ];
 
 const legacyLeadStatusOptions = [
@@ -47,6 +75,22 @@ const serviceInterestedOptions = [
   "Bridal Package",
   "Nail Art",
   "Grooming",
+
+  "Apartment",
+  "Villa",
+  "Plot",
+  "Commercial",
+  "Bunglow",
+  "Bungalow",
+
+  "1BHK",
+  "2BHK",
+  "2.5BHK",
+  "3BHK",
+  "4BHK",
+  "5BHK",
+  "6BHK",
+  "Penthouse",
 ];
 
 const clientSchema = new mongoose.Schema(
