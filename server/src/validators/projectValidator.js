@@ -18,6 +18,20 @@ const serviceCategories = [
   "Bridal",
   "Grooming",
   "Package",
+  "Apartment",
+  "Villa",
+  "Plot",
+  "Commercial",
+  "Bunglow",
+  "Bungalow",
+  "1BHK",
+  "2BHK",
+  "2.5BHK",
+  "3BHK",
+  "4BHK",
+  "5BHK",
+  "6BHK",
+  "Penthouse",
 ];
 
 const serviceStatuses = [
@@ -35,6 +49,20 @@ const serviceCategoryMap = {
   Bridal: "Bridal",
   Grooming: "Grooming",
   Package: "Package",
+  Apartment: "Apartment",
+  Villa: "Villa",
+  Plot: "Plot",
+  Commercial: "Commercial",
+  Bunglow: "Bunglow",
+  Bungalow: "Bungalow",
+  "1BHK": "1BHK",
+  "2BHK": "2BHK",
+  "2.5BHK": "2.5BHK",
+  "3BHK": "3BHK",
+  "4BHK": "4BHK",
+  "5BHK": "5BHK",
+  "6BHK": "6BHK",
+  Penthouse: "Penthouse",
 };
 
 const normalizeServiceCategories = (value) => {
