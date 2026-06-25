@@ -40,11 +40,23 @@ export default function Breadcrumbs() {
   }
 
   const getBreadcrumbTarget = (routeTo) => {
-    if (routeTo === "/projects") {
-    return searchParams.get("returnTo") || "/projects";
-  }
+    const legacyRouteMap = {
+      "/projects": "/services",
+      "/clients": "/customers",
+      "/site-visits": "/appointments",
+      "/deals": "/billing",
+      "/deals/all": "/billing/all",
+      "/deals/draft": "/billing/draft",
+      "/deals/issued": "/billing/issued",
+      "/deals/paid": "/billing/paid",
+      "/deals/revenue-summary": "/billing/reports",
+    };
 
-    return routeTo;
+    if (routeTo === "/services") {
+      return searchParams.get("returnTo") || "/services";
+    }
+
+    return legacyRouteMap[routeTo] || routeTo;
   };
 
   return (

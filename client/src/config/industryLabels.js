@@ -11,7 +11,7 @@ const industryLabelMap = {
   followup: "Reminder",
   siteVisits: "Appointments",
   siteVisit: "Appointment",
-  deals: "Invoices",
+  deals: "Billing",
   deal: "Invoice",
   dealReports: "Billing Reports",
   reports: "Reports",
@@ -34,10 +34,33 @@ export const industryLabels = {
   billing: "Billing",
   breadcrumbs: {
     dashboard: "Dashboard",
+
+    // Legacy keys
     projects: "Services",
     project: "Service",
     clients: "Customers",
     client: "Customer",
+    deals: "Billing",
+    deal: "Invoice",
+    siteVisits: "Appointments",
+    siteVisit: "Appointment",
+
+    // New salon route keys
+    services: "Services",
+    service: "Service",
+    customers: "Customers",
+    customer: "Customer",
+    billing: "Billing",
+    appointments: "Appointments",
+    appointment: "Appointment",
+
+    // Billing pages
+    all: "All Invoices",
+    draft: "Draft",
+    issued: "Issued",
+    paid: "Paid",
+
+    // Other
     leads: "Customers",
     followups: "Follow-ups",
     reminders: "Follow-ups",
@@ -45,10 +68,6 @@ export const industryLabels = {
     settings: "Settings",
     users: "Staff",
     user: "Staff Member",
-    deals: "Invoices",
-    deal: "Invoice",
-    siteVisits: "Appointments",
-    siteVisit: "Appointment",
     new: "Add Service",
     edit: "Edit Service",
     booking: "Booking",

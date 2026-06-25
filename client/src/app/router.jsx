@@ -5,8 +5,8 @@ import App from "./App";
 import DashboardLayout from "../components/layout/DashboardLayout";
 import PermissionRoute from "../components/common/PermissionRoute";
 import ProtectedRoute from "../components/common/ProtectedRoute";
-import LoaderScreen from "../components/common/LoaderScreen";
 import PageSkeleton from "../components/common/PageSkeleton";
+
 const LoginPage = lazy(() => import("../features/auth/pages/LoginPage"));
 const DashboardPage = lazy(() => import("../features/dashboard/pages/DashboardPage"));
 const ProjectsPage = lazy(() => import("../features/projects/pages/ProjectsPage"));
@@ -55,8 +55,10 @@ export const router = createBrowserRouter([
               </PermissionRoute>
             ),
           },
+
+          // Services - new salon routes
           {
-            path: "projects",
+            path: "services",
             element: withSuspense(
               <PermissionRoute moduleKey="projects">
                 <ProjectsPage />
@@ -64,13 +66,33 @@ export const router = createBrowserRouter([
             ),
           },
           {
-            path: "projects/new",
+            path: "services/new",
             element: withSuspense(
               <PermissionRoute moduleKey="projects" actionKey="create">
                 <AddProjectPage />
               </PermissionRoute>
             ),
           },
+          {
+            path: "services/:id/edit",
+            element: withSuspense(
+              <PermissionRoute moduleKey="projects" actionKey="update">
+                <AddProjectPage />
+              </PermissionRoute>
+            ),
+          },
+          {
+            path: "services/:id",
+            element: withSuspense(
+              <PermissionRoute moduleKey="projects">
+                <ProjectDetailsPage />
+              </PermissionRoute>
+            ),
+          },
+
+          // Legacy project routes
+          { path: "projects", element: <Navigate to="/services" replace /> },
+          { path: "projects/new", element: <Navigate to="/services/new" replace /> },
           {
             path: "projects/:id/edit",
             element: withSuspense(
@@ -87,8 +109,10 @@ export const router = createBrowserRouter([
               </PermissionRoute>
             ),
           },
+
+          // Customers - new salon routes
           {
-            path: "clients",
+            path: "customers",
             element: withSuspense(
               <PermissionRoute moduleKey="clients">
                 <ClientsPage />
@@ -96,7 +120,7 @@ export const router = createBrowserRouter([
             ),
           },
           {
-            path: "positive-clients",
+            path: "priority-customers",
             element: withSuspense(
               <PermissionRoute moduleKey="clients">
                 <PositiveClientsPage />
@@ -104,7 +128,7 @@ export const router = createBrowserRouter([
             ),
           },
           {
-            path: "clients/new",
+            path: "customers/new",
             element: withSuspense(
               <PermissionRoute moduleKey="clients" actionKey="create">
                 <AddClientPage />
@@ -112,13 +136,26 @@ export const router = createBrowserRouter([
             ),
           },
           {
-            path: "clients/:id/edit",
+            path: "customers/:id/edit",
             element: withSuspense(
               <PermissionRoute moduleKey="clients" actionKey="update">
                 <AddClientPage />
               </PermissionRoute>
             ),
           },
+          {
+            path: "customers/:id",
+            element: withSuspense(
+              <PermissionRoute moduleKey="clients">
+                <ClientDetailsPage />
+              </PermissionRoute>
+            ),
+          },
+
+          // Legacy client routes
+          { path: "clients", element: <Navigate to="/customers" replace /> },
+          { path: "positive-clients", element: <Navigate to="/priority-customers" replace /> },
+          { path: "clients/new", element: <Navigate to="/customers/new" replace /> },
           {
             path: "clients/:id",
             element: withSuspense(
@@ -128,6 +165,15 @@ export const router = createBrowserRouter([
             ),
           },
           {
+            path: "projects/:id",
+            element: withSuspense(
+              <PermissionRoute moduleKey="projects">
+                <ProjectDetailsPage />
+              </PermissionRoute>
+            ),
+          },
+
+          {
             path: "followups",
             element: withSuspense(
               <PermissionRoute moduleKey="followups">
@@ -135,17 +181,24 @@ export const router = createBrowserRouter([
               </PermissionRoute>
             ),
           },
+
+          // Appointments - new salon routes
           {
-            path: "site-visits",
+            path: "appointments",
             element: withSuspense(
               <PermissionRoute moduleKey="siteVisits">
                 <SiteVisitsPage />
               </PermissionRoute>
             ),
           },
-          { path: "deals", element: <Navigate to="/deals/all" replace /> },
+
+          // Legacy appointment route
+          { path: "site-visits", element: <Navigate to="/appointments" replace /> },
+
+          // Billing - new salon routes
+          { path: "billing", element: <Navigate to="/billing/all" replace /> },
           {
-            path: "deals/all",
+            path: "billing/all",
             element: withSuspense(
               <PermissionRoute moduleKey="deals">
                 <DealAllInvoicesPage />
@@ -153,7 +206,7 @@ export const router = createBrowserRouter([
             ),
           },
           {
-             path: "deals/draft",
+            path: "billing/draft",
             element: withSuspense(
               <PermissionRoute moduleKey="deals">
                 <DealNegotiationPage />
@@ -161,7 +214,7 @@ export const router = createBrowserRouter([
             ),
           },
           {
-            path:"deals/issued",
+            path: "billing/issued",
             element: withSuspense(
               <PermissionRoute moduleKey="deals">
                 <DealBookingsPage />
@@ -169,7 +222,7 @@ export const router = createBrowserRouter([
             ),
           },
           {
-            path: "deals/paid",
+            path: "billing/paid",
             element: withSuspense(
               <PermissionRoute moduleKey="deals">
                 <DealClosedDealsPage />
@@ -177,7 +230,7 @@ export const router = createBrowserRouter([
             ),
           },
           {
-            path: "deals/revenue-summary",
+            path: "billing/reports",
             element: withSuspense(
               <PermissionRoute moduleKey="dealReports">
                 <DealRevenueSummaryPage />
@@ -185,21 +238,39 @@ export const router = createBrowserRouter([
             ),
           },
           {
-            path: "deals/revenue",
-            element: withSuspense(
-              <PermissionRoute moduleKey="dealReports">
-                <DealRevenueSummaryPage />
-              </PermissionRoute>
-            ),
-          },
-          {
-            path: "deals/new",
+            path: "billing/new",
             element: withSuspense(
               <PermissionRoute moduleKey="deals" actionKey="create">
                 <DealUpsertPage />
               </PermissionRoute>
             ),
           },
+          {
+            path: "billing/:id/edit",
+            element: withSuspense(
+              <PermissionRoute moduleKey="deals" actionKey="update">
+                <DealUpsertPage />
+              </PermissionRoute>
+            ),
+          },
+          {
+            path: "billing/:id",
+            element: withSuspense(
+              <PermissionRoute moduleKey="deals">
+                <DealDetailsPage />
+              </PermissionRoute>
+            ),
+          },
+
+          // Legacy deal routes
+          { path: "deals", element: <Navigate to="/billing/all" replace /> },
+          { path: "deals/all", element: <Navigate to="/billing/all" replace /> },
+          { path: "deals/draft", element: <Navigate to="/billing/draft" replace /> },
+          { path: "deals/issued", element: <Navigate to="/billing/issued" replace /> },
+          { path: "deals/paid", element: <Navigate to="/billing/paid" replace /> },
+          { path: "deals/revenue-summary", element: <Navigate to="/billing/reports" replace /> },
+          { path: "deals/revenue", element: <Navigate to="/billing/reports" replace /> },
+          { path: "deals/new", element: <Navigate to="/billing/new" replace /> },
           {
             path: "deals/:id/edit",
             element: withSuspense(
@@ -216,6 +287,7 @@ export const router = createBrowserRouter([
               </PermissionRoute>
             ),
           },
+
           {
             path: "shared-history",
             element: withSuspense(
@@ -224,20 +296,20 @@ export const router = createBrowserRouter([
               </PermissionRoute>
             ),
           },
-           {
-             path: "settings",
-             element: withSuspense(
-               <PermissionRoute moduleKey="settings">
-                 <SettingsPage />
-               </PermissionRoute>
-             ),
-           },
-           {
-             path: "settings/users",
-             element: <Navigate to="/settings" replace />,
-           },
-         ],
-       },
-     ],
-   },
- ]);
+          {
+            path: "settings",
+            element: withSuspense(
+              <PermissionRoute moduleKey="settings">
+                <SettingsPage />
+              </PermissionRoute>
+            ),
+          },
+          {
+            path: "settings/users",
+            element: <Navigate to="/settings" replace />,
+          },
+        ],
+      },
+    ],
+  },
+]);
