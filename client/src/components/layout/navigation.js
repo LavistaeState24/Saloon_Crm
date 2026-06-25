@@ -64,7 +64,7 @@ export const navigationItems = [
     actionKey: "view",
   },
   {
-    to: "/settings/users",
+    to: "/settings",
     label: industryLabels.navigation.staff,
     icon: UserCog,
     moduleKey: "settings",

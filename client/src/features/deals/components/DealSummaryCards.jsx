@@ -7,18 +7,18 @@ export default function DealSummaryCards({ summary }) {
         label="Total Invoices"
         value={summary?.totalDeals ?? "--"}
         accent="gold"
-        meta="Billing Pipeline"
+        meta="All Invoices"
       />
 
       <StatCard
         label="Paid Invoices"
         value={summary?.closedDeals ?? "--"}
         accent="green"
-        meta="Payment Received"
+        meta="Successfully Paid"
       />
 
       <StatCard
-        label="Total Billing"
+        label="Billing Revenue"
         value={
           summary?.totalRevenue !== undefined &&
             summary?.totalRevenue !== null
@@ -26,14 +26,14 @@ export default function DealSummaryCards({ summary }) {
             : "--"
         }
         accent="wine"
-        meta="Invoice Value"
+        meta="Revenue Generated"
       />
 
       <StatCard
-        label="Collection Rate"
+        label="Billing Conversion"
         value={summary?.closingRate ?? "--"}
         accent="amber"
-        meta="Paid vs Total"
+        meta="Paid Invoice Ratio"
       />
     </section>
   );
