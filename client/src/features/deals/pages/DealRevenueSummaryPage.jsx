@@ -66,14 +66,14 @@ export default function DealRevenueSummaryPage() {
       </div>
 
       <div className="grid gap-4 rounded-[28px] border border-white/10 bg-white/5 p-5 shadow-glass md:grid-cols-2 xl:grid-cols-4">
-        <FormInput
-          label="From"
+        <FormInput 
+          label="Billing From"
           type="date"
           value={filters.dateFrom}
           onChange={(event) => setFilters((current) => ({ ...current, dateFrom: event.target.value }))}
         />
         <FormInput
-          label="To"
+          label="Billing To"
           type="date"
           value={filters.dateTo}
           onChange={(event) => setFilters((current) => ({ ...current, dateTo: event.target.value }))}
@@ -105,13 +105,13 @@ export default function DealRevenueSummaryPage() {
         <StatCard label="Total Invoices" value={summary?.totalDeals ?? "--"} accent="gold" meta="Tracked" />
         <StatCard label="Paid Invoices" value={summary?.closedDeals ?? "--"} accent="green" meta="Collected" />
         <StatCard label="Total Billing" value={formatCurrency(summary?.totalRevenue)} accent="wine" meta="Paid value" />
-        <StatCard label="Collection Rate" value={summary?.closingRate ?? "--"} accent="amber" meta="Performance" />
+        <StatCard label="Billing Conversion Rate" value={summary?.closingRate ?? "--"} accent="amber" meta="Performance" />
       </section>
 
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard label="Current Month Billing" value={formatCurrency(summary?.currentMonthRevenue)} accent="gold" meta="This month" />
         <StatCard label="Advance Collected" value={formatCurrency(summary?.totalTokens)} accent="blue" meta="Advance flow" />
-        <StatCard label="Pending Items" value={summary?.documentsPending ?? "--"} accent="rose" meta="Missing paperwork" />
+        <StatCard label="Pending Items" value={summary?.documentsPending ?? "--"} accent="rose" meta="Pending notes/items" />
         <StatCard label="Month Paid Invoices" value={summary?.currentMonthBookings ?? "--"} accent="green" meta="Services in range" />
       </section>
 
@@ -119,7 +119,7 @@ export default function DealRevenueSummaryPage() {
         <div className="mb-4 flex items-center justify-between gap-3">
           <div>
             <p className="text-xs uppercase tracking-[0.24em] text-gold">Staff Reports</p>
-            <h3 className="mt-2 font-display text-2xl">Biller performance snapshot</h3>
+            <h3 className="mt-2 font-display text-2xl">Staff Billing Performance</h3>
           </div>
         </div>
         <DataTable
@@ -127,8 +127,8 @@ export default function DealRevenueSummaryPage() {
           rows={staffReports}
           totalRecords={staffReports.length}
           loading={isLoading}
-          emptyMessage="No staff reports found."
-          searchPlaceholder="Search staff reports..."
+          emptyMessage="No staff billing reports found."
+          searchPlaceholder="Search staff billing reports..."
           defaultRowsPerPage={10}
         />
       </div>

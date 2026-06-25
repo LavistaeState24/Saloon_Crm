@@ -85,16 +85,16 @@ export default function DashboardPage() {
       </div>
     ),
   },
-  { key: "location", label: "Category" },
+  { key: "location", label: "Service Category" },
   {
     key: "configuration",
-    label: "Details",
+    label: "Service Details",
     searchValue: (row) => `${row.configuration || ""} ${formatPropertyTypes(row.propertyType)}`,
     render: (row) => row.configuration || formatPropertyTypes(row.propertyType),
   },
   {
     key: "priceRange",
-    label: "Price",
+    label: "Service Price",
     searchValue: (row) => `${row.priceRange?.min || ""} ${row.priceRange?.max || ""}`,
     render: (row) => formatPrice(row.priceRange),
   },
@@ -159,7 +159,7 @@ export default function DashboardPage() {
         <section className="space-y-4 rounded-[32px] border border-white/10 bg-white/5 p-6 shadow-glass">
           <div>
             <p className="text-xs uppercase tracking-[0.3em] text-gold">{industryLabels.dashboard.billing}</p>
-            <h3 className="mt-2 font-display text-2xl">Billing pipeline snapshot</h3>
+            <h3 className="mt-2 font-display text-2xl">Billing Revenue Snapshot</h3>
           </div>
           <DealSummaryCards summary={dealSummary} />
         </section>
@@ -210,7 +210,7 @@ export default function DashboardPage() {
               totalRecords={totalProjects}
               loading={isLoading}
               emptyMessage={`No recent ${industryLabels.dashboard.services.toLowerCase()} found.`}
-              searchPlaceholder={`Search fresh ${industryLabels.dashboard.services.toLowerCase()}...`}
+              searchPlaceholder="Search services..."
               defaultRowsPerPage={5}
             />
           </div>

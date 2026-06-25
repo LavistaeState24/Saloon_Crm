@@ -224,16 +224,20 @@ export const router = createBrowserRouter([
               </PermissionRoute>
             ),
           },
-          {
-            path: "settings",
-            element: withSuspense(
-              <PermissionRoute moduleKey="settings">
-                <SettingsPage />
-              </PermissionRoute>
-            ),
-          },
-        ],
-      },
-    ],
-  },
-]);
+           {
+             path: "settings",
+             element: withSuspense(
+               <PermissionRoute moduleKey="settings">
+                 <SettingsPage />
+               </PermissionRoute>
+             ),
+           },
+           {
+             path: "settings/users",
+             element: <Navigate to="/settings" replace />,
+           },
+         ],
+       },
+     ],
+   },
+ ]);
