@@ -52,7 +52,7 @@ export const getShareRecordToastStage = (record, now = Date.now()) => {
 };
 
 export const buildReminderToastMessage = (reminder, stage = "due") => {
-  const leadName = reminder?.client?.ownerName || "Lead";
+  const leadName = reminder?.client?.ownerName || "Customer";
   const type = reminder?.reminderType || "Reminder";
   const dueAt = formatDateTime(reminder?.reminderDateTime || reminder?.dueDate);
   const note = reminder?.note ? ` - ${reminder.note}` : "";
@@ -62,10 +62,10 @@ export const buildReminderToastMessage = (reminder, stage = "due") => {
 };
 
 export const buildShareRecordToastMessage = (record, stage = "due") => {
-  const leadName = record?.clientName || "Lead";
+  const leadName = record?.clientName || "Customer";
   const type = String(record?.shareChannel || "WhatsApp") === "Copy" ? "Details Send" : "WhatsApp";
   const dueAt = formatDateTime(record?.followUpDate);
-  const note = " - Follow up after shared project details";
+  const note = " - Follow up after shared service details";
   const prefix = stage === "overdue" ? "Overdue" : "Due";
 
   return `${prefix} ${type.toLowerCase()} reminder for ${leadName} at ${dueAt}${note}`;

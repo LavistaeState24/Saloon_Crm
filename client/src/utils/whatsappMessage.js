@@ -6,7 +6,7 @@ export const formatWhatsAppPhone = (phone) => {
 };
 
 export const buildClientSafeShareMessage = (projects = [], contact = {}) => {
-  const lines = ["Premium Property Details by Lavista Estate", ""];
+  const lines = ["Premium Salon Service Details by Lavista Salon", ""];
 
   projects.forEach((project, index) => {
     const amenitiesValue = project.amenities?.length ? project.amenities.join(", ") : null;
@@ -39,7 +39,7 @@ export const buildClientSafeShareMessage = (projects = [], contact = {}) => {
     lines.push(contact.phone);
   }
 
-  lines.push("", "Lavista Estate | WhatsApp for site visit and latest availability");
+  lines.push("", "Lavista Salon | WhatsApp for appointments and latest availability");
 
   return lines.filter(Boolean).join("\n");
 };

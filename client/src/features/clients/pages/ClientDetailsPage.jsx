@@ -51,6 +51,10 @@ import {
 } from "../../../config/industryLabels";
 
 const reminderTypes = ["Call", "WhatsApp", "Details Send", "Site Visit", "Payment", "Document"];
+const reminderTypeOptions = reminderTypes.map((type) => ({
+  value: type,
+  label: type === "Site Visit" ? "Appointment" : type,
+}));
 
 export default function ClientDetailsPage() {
   const { id } = useParams();
@@ -629,7 +633,7 @@ export default function ClientDetailsPage() {
                 ) : null}
                 <SelectDropdown
                   label="Reminder Type"
-                  options={["None", ...reminderTypes]}
+                  options={[{ value: "None", label: "None" }, ...reminderTypeOptions]}
                   value={callForm.reminderType}
                   onChange={(event) => updateCallForm("reminderType", event.target.value)}
                   error={callErrors.reminderType}
@@ -733,7 +737,7 @@ export default function ClientDetailsPage() {
                   />
                   <SelectDropdown
                     label="Reminder Type"
-                    options={reminderTypes}
+                    options={reminderTypeOptions}
                     disabled={isReminderLocked}
                     value={reminderForm.reminderType}
                     onChange={(event) => updateReminderForm("reminderType", event.target.value)}

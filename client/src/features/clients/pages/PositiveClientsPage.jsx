@@ -11,6 +11,7 @@ import { interestLevelOptions, leadStatusOptions } from "../../../constants/them
 import { clientService } from "../../../services/clientService";
 import { userService } from "../../../services/userService";
 import { formatBudgetRange, getInterestLevelTone } from "../clientPipeline";
+import { normalizeSalonCustomerStatus } from "../../../config/industryLabels";
 
 const initialFilters = {
   search: "",
@@ -74,7 +75,7 @@ export default function PositiveClientsPage() {
     () =>
       leadStatusOptions
         .filter((status) => !["New Lead", "Call Pending", "Connected", "Lost"].includes(status))
-        .map((status) => ({ value: status, label: status })),
+        .map((status) => ({ value: status, label: normalizeSalonCustomerStatus(status) })),
     [],
   );
 
@@ -179,7 +180,7 @@ export default function PositiveClientsPage() {
       searchValue: (row) => `${row.leadStatus || ""} ${row.interestLevel || ""}`,
       render: (row) => (
         <div className="flex flex-wrap gap-2">
-          <Badge tone={getLeadStatusTone(row.leadStatus)}>{row.leadStatus || "New Customer"}</Badge>
+          <Badge tone={getLeadStatusTone(row.leadStatus)}>{normalizeSalonCustomerStatus(row.leadStatus) || "New Customer"}</Badge>
           <Badge tone={getInterestLevelTone(row.interestLevel)}>{row.interestLevel || "Warm"}</Badge>
         </div>
       ),

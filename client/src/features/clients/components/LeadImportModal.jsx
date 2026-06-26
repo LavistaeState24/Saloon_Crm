@@ -271,7 +271,7 @@ export default function LeadImportModal({ isOpen, onClose, onImported }) {
               <div>
                 <p className="text-sm font-semibold text-ivory">{fileName || "CSV, XLS, or XLSX file"}</p>
                 <p className="mt-1 text-xs text-muted">
-                  Supports Facebook, Instagram, Housing.com, 99acres, MagicBricks, Rental, Broker, Reseller, and Manual Excel sheets.
+                  Supports salon lead sheets from ads, referrals, walk-ins, calls, and manual Excel uploads.
                 </p>
               </div>
             </div>

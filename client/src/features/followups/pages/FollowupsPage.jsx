@@ -12,6 +12,10 @@ import { followupService } from "../../../services/followupService";
 import { userService } from "../../../services/userService";
 
 const reminderTypes = ["Call", "WhatsApp", "Details Send", "Site Visit", "Payment", "Document"];
+const reminderTypeOptions = reminderTypes.map((type) => ({
+  value: type,
+  label: type === "Site Visit" ? "Appointment" : type,
+}));
 const reminderStatuses = ["Pending", "Completed", "Overdue", "Cancelled"];
 const initialFilters = {
   status: "",
@@ -178,7 +182,7 @@ export default function FollowupsPage() {
         />
         <SelectDropdown
           label="Type"
-          options={reminderTypes}
+          options={reminderTypeOptions}
           value={filters.type}
           onChange={(event) => setFilters((current) => ({ ...current, type: event.target.value }))}
         />

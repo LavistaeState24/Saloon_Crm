@@ -12,6 +12,10 @@ import { resolveAssetUrl } from "../../../services/uploadService";
 import { buildClientSafeShareMessage, formatWhatsAppPhone } from "../../../utils/whatsappMessage";
 
 const reminderTypes = ["Call", "WhatsApp", "Details Send", "Site Visit", "Payment", "Document"];
+const reminderTypeOptions = reminderTypes.map((type) => ({
+  value: type,
+  label: type === "Site Visit" ? "Appointment" : type,
+}));
 const sortOptions = [
   { value: "matchScore", label: "Best match" },
   { value: "priceLowToHigh", label: "Price low to high" },
@@ -93,7 +97,7 @@ export default function ClientMatchingSection({ client, onClientUpdate }) {
       setMatchMeta(data.meta || { total: 0 });
       setSelectedIds((current) => current.filter((id) => data.items.some((project) => project._id === id)));
     } catch (requestError) {
-      setMatchError(requestError.response?.data?.message || "Unable to load matching projects");
+      setMatchError(requestError.response?.data?.message || "Unable to load matching services");
     } finally {
       setIsLoadingMatches(false);
     }
@@ -129,7 +133,7 @@ export default function ClientMatchingSection({ client, onClientUpdate }) {
 
   const handleShare = async () => {
     if (!selectedIds.length) {
-      setShareError("Select at least one project to share");
+      setShareError("Select at least one service to share");
       return;
     }
 
@@ -173,7 +177,7 @@ export default function ClientMatchingSection({ client, onClientUpdate }) {
         popupWindow.close();
       }
 
-      setShareError(requestError.response?.data?.message || "Unable to share selected projects");
+      setShareError(requestError.response?.data?.message || "Unable to share selected services");
     } finally {
       setIsSubmittingShare(false);
     }
@@ -194,7 +198,7 @@ export default function ClientMatchingSection({ client, onClientUpdate }) {
         />
       ),
     },
-    { key: "projectName", label: "Project" },
+    { key: "projectName", label: "Service" },
     {
       key: "matchScore",
       label: "Match",
@@ -257,7 +261,7 @@ export default function ClientMatchingSection({ client, onClientUpdate }) {
     },
     {
       key: "projects",
-      label: "Projects",
+      label: "Services",
       render: (row) => (row.projectPublicAliases?.length ? row.projectPublicAliases.join(", ") : row.projectPublicAlias),
     },
     {
@@ -305,10 +309,10 @@ export default function ClientMatchingSection({ client, onClientUpdate }) {
         <div>
           <div className="flex items-center gap-3">
             <Link2 className="h-5 w-5 text-gold-2" />
-            <h3 className="font-display text-xl sm:text-2xl">Find Matching Projects</h3>
+            <h3 className="font-display text-xl sm:text-2xl">Find Matching Services</h3>
           </div>
           <p className="mt-2 text-sm text-muted">
-            Match by budget, configuration, area preference, property type, possession, and availability.
+            Match by budget, package, branch preference, service category, schedule, and availability.
           </p>
         </div>
 
@@ -330,7 +334,7 @@ export default function ClientMatchingSection({ client, onClientUpdate }) {
 
       <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
         <Button type="button" icon={RefreshCw} variant="secondary" className="w-full sm:w-auto" onClick={loadMatches} disabled={isLoadingMatches}>
-          {isLoadingMatches ? "Finding..." : "Find Matching Projects"}
+          {isLoadingMatches ? "Finding..." : "Find Matching Services"}
         </Button>
         <Badge tone="slate">{matchMeta.total || 0} matches</Badge>
         <Badge tone="green">{selectedIds.length} selected</Badge>
@@ -350,8 +354,8 @@ export default function ClientMatchingSection({ client, onClientUpdate }) {
           rows={matches}
           totalRecords={matchMeta.total}
           loading={isLoadingMatches}
-          emptyMessage="No matching projects found for this lead."
-          searchPlaceholder="Search matching projects..."
+          emptyMessage="No matching services found for this customer."
+          searchPlaceholder="Search matching services..."
           defaultRowsPerPage={5}
         />
       </div>
@@ -360,7 +364,7 @@ export default function ClientMatchingSection({ client, onClientUpdate }) {
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h4 className="font-display text-lg sm:text-xl">Share History</h4>
-            <p className="mt-1 text-sm text-muted">Client-safe messages sent from this lead.</p>
+            <p className="mt-1 text-sm text-muted">Client-safe messages sent for this customer.</p>
           </div>
           <Button type="button" variant="secondary" icon={RefreshCw} className="w-full sm:w-auto" onClick={loadHistory} disabled={isLoadingHistory}>
             {isLoadingHistory ? "Refreshing..." : "Refresh"}
@@ -374,7 +378,7 @@ export default function ClientMatchingSection({ client, onClientUpdate }) {
             columns={historyColumns}
             rows={history}
             loading={isLoadingHistory}
-            emptyMessage="No share history saved for this lead."
+            emptyMessage="No share history saved for this customer."
             searchPlaceholder="Search share history..."
             defaultRowsPerPage={5}
           />
@@ -382,7 +386,7 @@ export default function ClientMatchingSection({ client, onClientUpdate }) {
       </div>
 
       <Modal
-        title={shareChannel === "Copy" ? "Copy Client-safe Message" : "Share Matching Projects"}
+        title={shareChannel === "Copy" ? "Copy Client-safe Message" : "Share Matching Services"}
         isOpen={isShareOpen}
         onClose={() => {
           if (!isSubmittingShare) {
@@ -393,14 +397,14 @@ export default function ClientMatchingSection({ client, onClientUpdate }) {
       >
         <div className="space-y-4">
           <div className="rounded-2xl border border-white/10 bg-black/20 p-3 text-sm text-muted sm:p-4">
-            <p className="text-ivory">{selectedProjects.length} project(s) selected</p>
+            <p className="text-ivory">{selectedProjects.length} service(s) selected</p>
             <p className="mt-2 break-words">{selectedProjects.map((project) => project.projectName).join(", ")}</p>
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
             <SelectDropdown
               label="Reminder Type"
-              options={reminderTypes}
+              options={reminderTypeOptions}
               value={reminderType}
               onChange={(event) => setReminderType(event.target.value)}
             />
@@ -433,7 +437,7 @@ export default function ClientMatchingSection({ client, onClientUpdate }) {
           </div>
 
           <div className="rounded-2xl border border-amber-400/20 bg-amber-500/5 p-3 text-xs text-amber-100 sm:p-4">
-            Private project details, builder information, exact address, commission, internal notes, and backend IDs are excluded.
+            Private service-provider details, internal notes, and backend IDs are excluded.
           </div>
 
           {shareError ? <p className="text-sm text-rose-300">{shareError}</p> : null}

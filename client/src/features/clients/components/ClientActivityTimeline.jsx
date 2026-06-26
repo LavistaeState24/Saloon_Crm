@@ -18,22 +18,23 @@ import Button from "../../../components/common/Button";
 import SelectDropdown from "../../../components/common/SelectDropdown";
 import PageSkeleton from "../../../components/common/PageSkeleton";
 import { clientService } from "../../../services/clientService";
+import { normalizeSalonCustomerStatus } from "../../../config/industryLabels";
 
 const activityCategoryOptions = [
   { value: "all", label: "All activity" },
-  { value: "lead", label: "Lead changes" },
+  { value: "lead", label: "Customer changes" },
   { value: "calls", label: "Calls" },
   { value: "followups", label: "Follow-ups" },
-  { value: "shares", label: "Property shares" },
-  { value: "visits", label: "Site visits" },
-  { value: "deals", label: "Deals" },
+  { value: "shares", label: "Service shares" },
+  { value: "visits", label: "Appointments" },
+  { value: "deals", label: "Invoices" },
 ];
 
 const activityTypeLabels = {
-  "lead.created": "Lead created",
-  "lead.assigned": "Lead assigned",
-  "lead.reassigned": "Lead reassigned",
-  "lead.status_changed": "Lead status",
+  "lead.created": "Customer created",
+  "lead.assigned": "Customer assigned",
+  "lead.reassigned": "Customer reassigned",
+  "lead.status_changed": "Customer status",
   "lead.notes_updated": "Notes",
   "lead.internal_notes_updated": "Internal notes",
   "call.logged": "Call",
@@ -44,9 +45,9 @@ const activityTypeLabels = {
   "share.created": "Share",
   "site_visit.created": "Visit",
   "site_visit.updated": "Visit updated",
-  "deal.created": "Deal",
-  "deal.updated": "Deal updated",
-  "deal.status_changed": "Deal status",
+  "deal.created": "Invoice",
+  "deal.updated": "Invoice updated",
+  "deal.status_changed": "Invoice status",
 };
 
 const activityTypeIcons = {
@@ -279,7 +280,7 @@ export default function ClientActivityTimeline({ leadId, refreshKey = 0 }) {
           <History className="h-5 w-5 text-gold-2" />
           <div>
             <h3 className="font-display text-xl sm:text-2xl">Activity Timeline</h3>
-            <p className="text-sm text-muted">Calls, follow-ups, shares, visits, deals, and lead changes.</p>
+            <p className="text-sm text-muted">Calls, follow-ups, shares, appointments, invoices, and customer changes.</p>
           </div>
         </div>
         <div className="w-full lg:w-64">
@@ -298,7 +299,7 @@ export default function ClientActivityTimeline({ leadId, refreshKey = 0 }) {
       <div className=" max-h-[40vh] overflow-y-auto pr-1 sm:mt-5 sm:pr-2">
         {loading && !items.length ? <PageSkeleton variant="table" className="rounded-[32px]" /> : null}
 
-        {!loading && !items.length ? <p className="text-sm text-muted">No activity recorded for this lead yet.</p> : null}
+        {!loading && !items.length ? <p className="text-sm text-muted">No activity recorded for this customer yet.</p> : null}
 
         {items.map((activity) => {
           const Icon = activityTypeIcons[activity.activityType] || History;
@@ -310,10 +311,14 @@ export default function ClientActivityTimeline({ leadId, refreshKey = 0 }) {
           const changeEntries = showDiffs
             ? [
               ["Assigned Staff", activity.oldValues?.assignedStaff, activity.newValues?.assignedStaff],
-              ["Lead Status", activity.oldValues?.leadStatus, activity.newValues?.leadStatus],
+              [
+                "Customer Status",
+                activity.oldValues?.leadStatus === undefined ? undefined : normalizeSalonCustomerStatus(activity.oldValues?.leadStatus),
+                activity.newValues?.leadStatus === undefined ? undefined : normalizeSalonCustomerStatus(activity.newValues?.leadStatus),
+              ],
               ["Notes", activity.oldValues?.notes, activity.newValues?.notes],
               ["Internal Notes", activity.oldValues?.internalNotes, activity.newValues?.internalNotes],
-              ["Deal Status", activity.oldValues?.dealStatus, activity.newValues?.dealStatus],
+              ["Invoice Status", activity.oldValues?.dealStatus, activity.newValues?.dealStatus],
               ["Visit Status", activity.oldValues?.visitStatus, activity.newValues?.visitStatus],
               ["Follow-up Status", activity.oldValues?.status, activity.newValues?.status],
             ].filter(([, oldValue, newValue]) => oldValue !== undefined || newValue !== undefined)

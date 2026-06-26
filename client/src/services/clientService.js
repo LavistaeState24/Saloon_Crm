@@ -15,12 +15,12 @@ export const clientService = {
   listAllPositive: async (params) => fetchAllPaginated((requestParams) => clientService.listPositive(requestParams), params),
   create: async (payload) => {
     const { data } = await api.post("/clients", payload);
-    toast.success("Lead created successfully");
+    toast.success("Customer created successfully");
     return data.data;
   },
   importLeads: async (payload) => {
     const { data } = await api.post("/clients/import", payload);
-    toast.success("Leads imported successfully");
+    toast.success("Customers imported successfully");
     return data.data;
   },
   getImportHistory: async (params) => {
@@ -45,12 +45,12 @@ export const clientService = {
   },
   shareProjects: async (id, payload) => {
     const { data } = await api.post(`/clients/${id}/share-projects`, payload);
-    toast.success("Projects shared successfully");
+    toast.success("Services shared successfully");
     return data.data;
   },
   update: async (id, payload) => {
     const { data } = await api.put(`/clients/${id}`, payload);
-    toast.success("Lead updated successfully");
+    toast.success("Customer updated successfully");
     return data.data;
   },
   listCallLogs: async (id) => {
@@ -64,7 +64,7 @@ export const clientService = {
   },
   remove: async (id) => {
     const { data } = await api.delete(`/clients/${id}`);
-    toast.success("Lead deleted successfully");
+    toast.success("Customer deleted successfully");
     return data;
   },
 };

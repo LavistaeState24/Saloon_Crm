@@ -169,6 +169,17 @@ export const salonCustomerStatusOptions = [
 
 export const salonPriorityLevelOptions = ["Hot", "Warm", "Cold"];
 
-export const normalizeSalonCustomerStatus = (value) => value || "";
+const legacyStatusMap = {
+  "New Lead": "New Customer",
+  "Call Pending": "Contacted",
+  Connected: "Contacted",
+  Positive: "Follow-up Pending",
+  "Site Visit Planned": "Appointment Planned",
+  "Site Visit Done": "Appointment Planned",
+  Booking: "Converted",
+  Closed: "Service Completed",
+};
+
+export const normalizeSalonCustomerStatus = (value) => legacyStatusMap[value] || value || "";
 
 export const getIndustryLabel = (key, fallback = "") => industryLabelMap[key] || fallback || key;

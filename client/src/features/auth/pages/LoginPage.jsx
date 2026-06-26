@@ -13,6 +13,7 @@ import {
   getErrorMessage,
   phoneRules,
   textRules,
+  passwordRules,
 } from "../../../utils/validation";
 
 const initialRegisterState = {
@@ -92,15 +93,15 @@ export default function LoginPage() {
     <div className="min-h-screen bg-ink bg-glow px-6 py-12 text-ivory">
       <div className="mx-auto grid max-w-6xl gap-8 lg:grid-cols-[1.2fr,0.8fr]">
         <section className="rounded-[36px] border border-white/10 bg-white/5 p-8 shadow-glass backdrop-blur-xl">
-          <p className="text-xs uppercase tracking-[0.4em] text-gold">Salon Appointment Desk</p>
+          <p className="text-xs uppercase tracking-[0.4em] text-gold">Salon CRM</p>
           <h1 className="mt-4 max-w-xl font-display text-5xl leading-tight text-ivory">
-            The premium control system for real estate inventory, leads, and curated client sharing.
+            Manage appointments, customers, staff, services, and billing from one powerful salon management platform.
           </h1>
           <div className="mt-8 grid gap-4 sm:grid-cols-3">
             {[
-              { label: "Service intelligence", icon: Building2 },
-              { label: "Role-based operations", icon: Users },
-              { label: "Client-safe sharing", icon: ShieldCheck },
+              { label: "Appointment Scheduling", icon: Building2 },
+              { label: "Staff Management", icon: Users },
+              { label: "Customer Records", icon: ShieldCheck },
             ].map((item) => {
               const Icon = item.icon;
 
